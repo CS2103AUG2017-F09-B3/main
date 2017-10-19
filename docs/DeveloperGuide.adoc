@@ -345,6 +345,189 @@ image::UndoRedoActivityDiagram.png[width="200"]
 **Cons:** Requires dealing with commands that have already been undone: We must remember to skip these commands. Violates Single Responsibility Principle and Separation of Concerns as `HistoryManager` now needs to do two different things. +
 // end::undoredo[]
 
+// tag::sort[]
+=== sort mechanism
+
+The sort mechanism is operates from sorting the 'internalList' in 'UniquePersonList' which resides in the model componet. Sort supports reformatting the current list of person according to the user's chosen details in ascending order. Such commands will inherit from `Command`.
+
+With the help of sortCommandParser, the user's sorting type preference will be extracted from the CLI and passed into sortCommand.Invalid sorting type or command will not be sorted, and parseException will be generated:
+
+image::SortCommandDiagram.png[width="800"]
+
+As you can see from the diagram, `SortCommandParser` validates and extract the user's sorting type request. SortCommand will call the model component to sort the 'interalList'. Invalid Commands will be handled by ParseException command to prompt user for a correct sorting type.
+
+Commands that are not sortable are implemented this way:
+[source,java]
+----
+public SortCommand(String sortType) {
+    this.sortType = sortType;
+}
+
+@Override
+public CommandResult execute() throws CommandException {
+    //... list logic ...
+}
+----
+Commands that are not sortable will be handled by ParseException:
+[source,java]
+----
+catch (IllegalValueException ive) {
+    throw new ParseException(
+        String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
+}
+----
+
+Suppose that the user has just launched the application. The `internalList` is filled with these four persons. A sample of the outlook of internalist is shown below.
+
+image::OriginalInternalList.png[width="800"]
+
+The user executes a new `SortCommand`, `sort number`, to sort all person in the address book by their phone number. interalList in 'UniquePersonList' should then be sorted.
+
+image::SortedNumberList.png[width="800"]
+
+As the user continues to use the program, the user can request for a different sort command. For example, the user may execute sort name to interalList by their name.
+
+image::OriginalInternalList.png[width="800"]
+
+The following sequence diagram shows how the sort operation works:
+
+image::SortSequenceDiagram.png[width="800"]
+
+[NOTE]
+The user may choose to sort the persons by other parameters. The parameters includes : name, number, address, email, remark, birthday.
+
+If a command fails its execution, no sorting will be done and a parse Exception will be used to handle the format for incorrect Commands.
+
+==== Design Considerations
+
+**Aspect:** Implementation of `SortCommand` +
+**Alternative 1 (current choice):** Sort the interalList via `Collections.sort()` and  +
+**Pros:** We will be able to sort using merge or Tim sort which offers a stable and efficient (O(n log n)) efficiency +
+**Cons:** May not be optimal when sorting again after adding one new person only. +
+**Alternative 2:** Implement different algorithm depends on different type or number of persons added +
+**Pros:** Able to obtain optimal efficiency for sorting everytime. +
+**Cons:** Alot of code needed for all the different types of persons added to ensure better efficiency than Tim sort.
+
+---
+
+**Aspect:** Sorting persons based on type +
+**Alternative 1 (current choice):** Uses Lambdas to sort. +
+**Pros:** Clean one line code to compare person to sort. +
+**Cons:** - +
+**Alternative 2:** Individual Comparator for person object based on sorting parameter. +
+*Pros:** Sort the persons based on comparator, more free play to the comparisons in sorting. +
+**Cons:** Less efficient as more context switch is needed, resulting in higher overhead time.
+
+// tag::BirthdayNotifier[]
+=== Birthday and Birthday Notifier mechanism
+
+The birthday notifier mechanism is facilitated by a `BirthdayNotifier`, which resides within the `Model` component.
+It creates a pop-up every time the app is run to inform the user of any birthdays that happen to fall on that day.
+This mechanism works side by side with the `Birthday` field of each `Person`.
+
+`BirthdayNotifier` is created and run in the `MainApp` every time the app is run. `BirthdayNotifier` will then check
+through the `Birthday` of the list of `Person` that was passed in from `MainApp`. It will then create a
+`BirthdayPopup` to show the list of `Person` with birthdays on that day. These relationships are illustrated in the
+diagram below.
+
+image::BirthdayNotifierDiagram.png[width = "800"]
+
+Implementation of checking through all the `Person` in `BirthdayNotifier`:
+[source,java]
+----
+for (ReadOnlyPerson e: list) {
+    if (e.getDay() == date && e.getMonth() == month) {
+        people.add(e.getName().toString());
+    }
+}
+
+if(people.size() > 0) {
+    createPopup(people.toArray(new String[people.size()]));
+}
+----
+
+The popup creation is implemented this way:
+[source,java]
+----
+private JDialog frame = new JDialog();
+private GridBagConstraints constraints = new GridBagConstraints();
+
+public BirthdayPopup(String[] person) {
+    createFrame(person.length);
+    createIcon();
+    createCloseButton();
+    createMessage(person);
+    createPopup();
+}
+----
+
+Suppose that the user has just launched the application. The `MainApp` will create `BirthdayNotifier` to check
+through the `Birthday` s.
+
+If there is at least one `Person` with a birthday on that day, `BirthdayNotifier` will create a new `BirthdayPopup`
+at the bottom right hand corner to inform the user. An example is shown below.
+
+image::BirthdayPopup.png[width = "400"]
+
+[NOTE]
+If the `Person` 's birthday is not set, it'll not affect `BirthdayNotifier`.
+
+The following sequence diagram shows how the `BirthdayNotifier` works:
+
+image::BirthdayNotifierSequenceDiagram.png[width = "800"]
+
+[NOTE]
+If there are no birthdays on that day or if the address book is empty, no popup will be shown.
+
+The following activity diagram summarize what happens when a user runs the application:
+
+image::BirthdayNotifierActivityDiagram.png[width = "200"]
+
+==== Design Considerations
+
+**Aspect:** When to show popup +
+**Alternative 1 (current choice):** Show popup during startup of application +
+**Pros:** User will most likely see the popup since the user just started the application +
+**Cons:** Popup may not show when the date has changed +
+**Alternative 2:** Show popup when the date changes +
+**Pros:** The birthday list is constantly updated and shown to user +
+**Cons:** The user may not be paying attention and will miss the popup +
+**Additional Information:** planning to implement both options
+
+---
+
+**Aspect:** Implementation of `BirthdayPopup` frame +
+**Alternative 1 (current choice):** Using JDialog +
+**Pros:** JDialog does not create an application bar in the task bar +
+**Cons:** JDialog does not come with default buttons for maximizing or minimizing +
+**Alternative 2:** Using JFrame +
+**Pros:** JFrame comes with default buttons to close, maximize and minimize etc. +
+**Cons:** JFrame will create an application bar in the task bar (ugly)
+
+---
+
+**Aspect:** Implementation of `BirthdayPopup` timer +
+**Alternative 1 (current choice):** Use a timer to close the popup after 5 seconds +
+**Pros:** Closes the dialog automatically and duration of pause can be changed +
+**Cons:** The user may not get a chance to see the popup +
+**Alternative 2:** Don't use a timer +
+**Pros:** The user determines when to close it and gets a chance to see the popup +
+**Cons:** The user has to manually close it. Maybe be troublesome. +
+**Additional Information:** Planning to implement a timer reset when the mouse hovers above the popup
+
+---
+
+**Aspect:** Size of popup +
+**Alternative 1 (current choice):** Size of popup depends on the number of birthdays +
+**Pros:** The message will not be lost and it can contain any amount of names +
+**Cons:** The popup may get very large +
+**Alternative 2:** Fixed size for popup +
+**Pros:** Very neat and consistent +
+**Cons:** If the list of names gets too big, some names will not be shown +
+
+---
+// end::BirthdayNotifier[]
+
 === Logging
 
 We are using `java.util.logging` package for logging. The `LogsCenter` class is used to manage the logging levels and logging destinations.

@@ -22,7 +22,9 @@ public class BirthdayNotifier {
                 people.add(e.getName().toString());
             }
         }
-        createPopup(people.toArray(new String[people.size()]));
+        if (people.size() > 0) {
+            createPopup(people.toArray(new String[people.size()]));
+        }
     }
     void createPopup(String[] person) {
         new BirthdayPopup(person);
