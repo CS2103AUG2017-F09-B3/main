@@ -9,6 +9,7 @@ import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.ProfilePicture;
 import seedu.address.model.person.ReadOnlyPerson;
 import seedu.address.model.person.Remark;
 import seedu.address.model.tag.Tag;
@@ -25,6 +26,7 @@ public class PersonBuilder {
     public static final String DEFAULT_ADDRESS = "123, Jurong West Ave 6, #08-111";
     public static final String DEFAUT_REMARK = "";
     public static final String DEFAULT_TAGS = "friends";
+    public static final String DEFAULT_PICTURE = "profiles/default.png";
     public static final String DEFAULT_BIRTHDAY = "";
     private Person person;
 
@@ -37,8 +39,9 @@ public class PersonBuilder {
             Remark defaultRemark = new Remark(DEFAUT_REMARK);
             Birthday defaultBirthday = new Birthday(DEFAULT_BIRTHDAY);
             Set<Tag> defaultTags = SampleDataUtil.getTagSet(DEFAULT_TAGS);
+            ProfilePicture defaultPicture = new ProfilePicture(DEFAULT_PICTURE);
             this.person = new Person(defaultName, defaultPhone, defaultEmail, defaultAddress, defaultRemark,
-                    defaultBirthday, defaultTags);
+                    defaultBirthday, defaultTags, defaultPicture);
         } catch (IllegalValueException ive) {
             throw new AssertionError("Default person's values are invalid.");
         }

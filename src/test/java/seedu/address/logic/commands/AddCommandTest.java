@@ -149,6 +149,11 @@ public class AddCommandTest {
         public void mapPerson(ReadOnlyPerson target) {
             fail("This method should not be called.");
         }
+
+        @Override
+        public void changeImage(ReadOnlyPerson target) {
+            fail("This method should not be called.");
+        }
     }
 
     /**

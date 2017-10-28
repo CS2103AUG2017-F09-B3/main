@@ -59,4 +59,9 @@ public interface Model {
      * Shows the map for selected person in browser
      */
     void mapPerson(ReadOnlyPerson target) throws PersonNotFoundException;
+
+    /**
+     * Edits the profile picture for selected person
+     */
+    void changeImage(ReadOnlyPerson target) throws PersonNotFoundException;
 }

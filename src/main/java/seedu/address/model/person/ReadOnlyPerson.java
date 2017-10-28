@@ -30,6 +30,9 @@ public interface ReadOnlyPerson {
     int getMonth();
     ObjectProperty<UniqueTagList> tagProperty();
     Set<Tag> getTags();
+    ObjectProperty<ProfilePicture> imageProperty();
+    void setImage(String image);
+    ProfilePicture getPicture();
 
     /**
      * Returns true if both have the same state. (interfaces cannot override .equals)

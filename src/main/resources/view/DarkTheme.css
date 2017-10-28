@@ -127,10 +127,19 @@
 
 .cell_small_label {
     -fx-font-family: "Segoe UI";
-    -fx-font-size: 13px;
-    -fx-text-fill: #010504;
+    -fx-font-size: 15px;
+    -fx-text-fill: black;
+    -fx-min-width: 70;
+    -fx-min-height: 30;
+    -fx-background-color: linear-gradient(white, lightsteelblue);
+    -fx-background-radius: 5;
 }
 
+.cell_small_label1 {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 15px;
+    -fx-text-fill: dodgerblue;
+}
 .anchor-pane {
      -fx-background-color: derive(#1d1d1d, 20%);
 }
@@ -344,7 +353,7 @@
     -fx-text-fill: white;
     -fx-background-color: #3e7b91;
     -fx-padding: 1 3 1 3;
-    -fx-border-radius: 2;
+    -fx-border-radius: 4;
     -fx-background-radius: 2;
-    -fx-font-size: 11;
+    -fx-font-size: 15;
 }

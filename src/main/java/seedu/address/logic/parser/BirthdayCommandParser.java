@@ -28,9 +28,12 @@ public class BirthdayCommandParser implements Parser<BirthdayCommand> {
         Birthday birthday;
         try {
             index = ParserUtil.parseIndex(splitArgs[0]);
+            if (splitArgs.length < 2) {
+                throw new IllegalValueException(Birthday.MESSAGE_BIRTHDAY_CONSTRAINTS);
+            }
             birthday = new Birthday(splitArgs[1]);
         } catch (IllegalValueException ive) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, BirthdayCommand.MESSAGE_USAGE));
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, BirthdayCommand.MESSAGE_USAGE), ive);
         }
 
         return new BirthdayCommand(index, birthday);

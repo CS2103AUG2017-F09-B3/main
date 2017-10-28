@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+    <ImageView fx:id="profileImage" fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+    <GridPane fx:id = "personInfoPanel" styleClass="grid-pane" xmlns="http://javafx.com/javafx/8"
+    xmlns:fx="http://javafx.com/fxml/1">
+        <Label text="Name:" styleClass="cell_small_label" GridPane.columnIndex="0" />
+        <Label fx:id="name" styleClass="cell_small_label1" text="\$name" GridPane.columnIndex="1" />
+        <Label text="Phone:" styleClass="cell_small_label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <Label fx:id="phone" styleClass="cell_small_label1" text="\$phone" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label text="Address:" styleClass="cell_small_label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <Label fx:id="address" styleClass="cell_small_label1" text="\$address" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label text="Email:" styleClass="cell_small_label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <Label fx:id="email" styleClass="cell_small_label1" text="\$email" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <Label text="Birthday:" styleClass="cell_small_label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <Label fx:id="birthday" styleClass="cell_small_label1" text="\$birthday" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+        <Label text="Remarks:" styleClass="cell_small_label" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+        <Label fx:id="remark" styleClass="cell_small_label1" text="\$remark" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+        <FlowPane fx:id="tags" prefHeight="23.0" prefWidth="172.0" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+      <columnConstraints>
+         <ColumnConstraints maxWidth="395.0" minWidth="-Infinity" prefWidth="75.0" />
+         <ColumnConstraints maxWidth="401.0" minWidth="69.0" prefWidth="389.0" />
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+      </rowConstraints>
+    </GridPane>
+</VBox>

@@ -1,8 +1,17 @@
 package seedu.address.ui;
 
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
+import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 
 import javafx.collections.ObservableList;
@@ -11,6 +20,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.commons.events.storage.DataSavingExceptionEvent;
 import seedu.address.commons.events.ui.NewResultAvailableEvent;
 import seedu.address.logic.ListElementPointer;
 import seedu.address.logic.Logic;
@@ -27,7 +37,11 @@ public class CommandBox extends UiPart<Region> {
     public static final int ONE_INDEX = 1;
     public static final String ERROR_STYLE_CLASS = "error";
     private static final String FXML = "CommandBox.fxml";
-
+    private static ArrayList<String> possibleSuggestionAdd = new ArrayList<String> ();
+    private static String[] possibleSuggestion = {"add", "clear", "list",
+        "edit", "find", "delete", "select", "history", "undo", "redo", "exit", "sort", "sort name",
+        "sort num", "sort email", "sort address", "sort remark"};
+    private static ArrayList<String> mainPossibleSuggestion = new ArrayList<String>(Arrays.asList(possibleSuggestion));
 
     private final Logger logger = LogsCenter.getLogger(CommandBox.class);
     private final Logic logic;
@@ -37,17 +51,27 @@ public class CommandBox extends UiPart<Region> {
     private TextField commandTextField;
     private ArrayList<String> prevText = new ArrayList<String>();
 
+    private AutoCompletionBinding autocompletionbinding;
     public CommandBox(Logic logic) {
         super(FXML);
         this.logic = logic;
         // calls #setStyleToDefault() whenever there is a change to the text of the command box.
         commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
         historySnapshot = logic.getHistorySnapshot();
-        String[] possibleSuggestion = {"add", "clear", "list",
-            "edit", "find", "delete", "select", "history", "undo", "redo", "exit", "sort name",
-            "sort num", "sort email", "sort address", "sort remark", "nextsong"};
-        TextFields.bindAutoCompletion(commandTextField, possibleSuggestion);
-
+        System.out.println(commandTextField.getText());
+        try {
+            XMLDecoder e = new XMLDecoder(new FileInputStream("Autocomplete.xml"));
+            mainPossibleSuggestion = ((ArrayList<String>) e.readObject());
+            e.close();
+        } catch (Exception ex) {
+            try {
+                File file = new File("Autocomplete.xml");
+                file.createNewFile();
+            } catch (IOException ioe) {
+                raise(new DataSavingExceptionEvent(ex));
+            }
+        }
+        autocompletionbinding = TextFields.bindAutoCompletion(commandTextField, mainPossibleSuggestion);
     }
 
     /**
@@ -83,10 +107,21 @@ public class CommandBox extends UiPart<Region> {
             break;
 
         default:
-            // let JavaFx handle the keypress
+
         }
     }
-
+    public static void setAddSuggestion(String commandWord) {
+        if (!mainPossibleSuggestion.contains(commandWord)) {
+            try {
+                mainPossibleSuggestion.add(commandWord);
+                XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("Autocomplete.xml")));
+                e.writeObject(mainPossibleSuggestion);
+                e.close();
+            } catch (Exception ex) {
+                System.out.println("error"); //to be updated
+            }
+        }
+    }
     /**
      * Updates the text field with the previous input in {@code historySnapshot},
      * if there exists a previous input in {@code historySnapshot}
@@ -96,6 +131,7 @@ public class CommandBox extends UiPart<Region> {
         if (!historySnapshot.hasPrevious()) {
             return;
         }
+
 
         replaceText(historySnapshot.previous());
     }
@@ -133,6 +169,8 @@ public class CommandBox extends UiPart<Region> {
             historySnapshot.next();
             // process result of the command
             commandTextField.setText("");
+            autocompletionbinding.dispose();
+            autocompletionbinding = TextFields.bindAutoCompletion(commandTextField, mainPossibleSuggestion);
             logger.info("Result: " + commandResult.feedbackToUser);
             raise(new NewResultAvailableEvent(commandResult.feedbackToUser));
 

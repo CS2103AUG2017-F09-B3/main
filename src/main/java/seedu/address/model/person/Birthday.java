@@ -2,6 +2,8 @@ package seedu.address.model.person;
 
 import static java.util.Objects.requireNonNull;
 
+import java.time.LocalDateTime;
+
 import seedu.address.commons.exceptions.IllegalValueException;
 
 /**
@@ -33,7 +35,7 @@ public class Birthday {
         if (birthday.equals("") || birthday.equals("Not Set") || birthday.equals("remove")) {
             this.value = "Not Set";
             day = month = year = 0;
-        } else if (!isValidBirthday(trimmedBirthday)) {
+        } else if (!isValidBirthday(trimmedBirthday) || !isDateCorrect(trimmedBirthday.split("-"))) {
             throw new IllegalValueException(MESSAGE_BIRTHDAY_CONSTRAINTS);
         } else {
             this.value = trimmedBirthday;
@@ -42,8 +44,34 @@ public class Birthday {
             this.month = Integer.parseInt(splitBirthday[1]);
             this.year = Integer.parseInt(splitBirthday[2]);
         }
+
     }
 
+    /**
+     * Determines if date entered by user is correct and ensures that it is not after current date
+     * @param birthday
+     * @return
+     */
+    public static boolean isDateCorrect(String[] birthday) {
+        LocalDateTime now = LocalDateTime.now();
+        int day = now.getDayOfMonth();
+        int month = now.getMonthValue();
+        int year = now.getYear();
+
+        int inputDay = Integer.parseInt(birthday[0]);
+        int inputMonth = Integer.parseInt(birthday[1]);
+        int inputYear = Integer.parseInt(birthday[2]);
+
+        if (inputYear > year) {
+            return false;
+        } else if (inputYear == year && inputMonth > month) {
+            return false;
+        } else if (inputYear == year && inputMonth == month && inputDay > day) {
+            return false;
+        } else {
+            return true;
+        }
+    }
     /**
      * Returns true if a given string is a valid person birthday.
      */

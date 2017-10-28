@@ -1,6 +1,13 @@
 package seedu.address.ui;
 
+import java.io.File;
+import java.io.IOException;
+
 import java.util.logging.Logger;
+
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -14,14 +21,19 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+
 import seedu.address.commons.core.Config;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.commons.events.ui.ChangeImageEvent;
 import seedu.address.commons.events.ui.ExitAppRequestEvent;
+import seedu.address.commons.events.ui.MapPersonEvent;
 import seedu.address.commons.events.ui.ShowHelpRequestEvent;
 import seedu.address.commons.util.FxViewUtil;
 import seedu.address.logic.Logic;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.person.ReadOnlyPerson;
+import seedu.address.storage.XmlImageStorage;
 
 /**
  * The Main Window. Provides the basic application layout containing
@@ -40,13 +52,16 @@ public class MainWindow extends UiPart<Region> {
     private Logic logic;
 
     // Independent Ui parts residing in this Ui container
-    private BrowserPanel browserPanel;
+    private PersonInfoPanel personInfoPanel;
     private PersonListPanel personListPanel;
     private Config config;
     private UserPrefs prefs;
 
+    // Storage organizer for image command
+    private XmlImageStorage imageStorage;
+
     @FXML
-    private StackPane browserPlaceholder;
+    private StackPane infoPlaceholder;
 
     @FXML
     private StackPane commandBoxPlaceholder;
@@ -82,6 +97,8 @@ public class MainWindow extends UiPart<Region> {
 
         setAccelerators();
         registerAsAnEventHandler(this);
+
+        imageStorage = new XmlImageStorage();
     }
 
     public Stage getPrimaryStage() {
@@ -126,8 +143,8 @@ public class MainWindow extends UiPart<Region> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
-        browserPanel = new BrowserPanel();
-        browserPlaceholder.getChildren().add(browserPanel.getRoot());
+        personInfoPanel = new PersonInfoPanel();
+        infoPlaceholder.getChildren().add(personInfoPanel.getRoot());
 
         personListPanel = new PersonListPanel(logic.getFilteredPersonList());
         personListPanelPlaceholder.getChildren().add(personListPanel.getRoot());
@@ -208,17 +225,57 @@ public class MainWindow extends UiPart<Region> {
         raise(new ExitAppRequestEvent());
     }
 
-    public PersonListPanel getPersonListPanel() {
-        return this.personListPanel;
+    /**
+     * Opens the map window.
+     */
+    private void handleMapEvent(ReadOnlyPerson person) {
+        MapWindow mapWindow = new MapWindow(person);
+        mapWindow.show();
     }
 
-    void releaseResources() {
-        browserPanel.freeResources();
+    /**
+     * Opens file browser.
+     */
+    private void handleImageEvent(ReadOnlyPerson person) {
+        JDialog parent = new JDialog();
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Any Image files", "jpg", "png", "jpeg");
+        fileChooser.setFileFilter(filter);
+        fileChooser.setCurrentDirectory(new File("data"));
+        parent.setAlwaysOnTop(true);
+        parent.setAutoRequestFocus(true);
+        int result = fileChooser.showDialog(parent, "Select Image");
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try {
+                imageStorage.saveImage(selectedFile, person.getName().toString());
+            } catch (IOException io) {
+                logger.warning("failed to copy image");
+            }
+            person.setImage(person.getName().toString() + ".png");
+        }
+    }
+
+    public PersonListPanel getPersonListPanel() {
+        return this.personListPanel;
     }
 
     @Subscribe
     private void handleShowHelpEvent(ShowHelpRequestEvent event) {
         logger.info(LogsCenter.getEventHandlingLogMessage(event));
         handleHelp();
+    }
+
+    @Subscribe
+    private void handleMapPanelEvent(MapPersonEvent event) {
+        logger.info(LogsCenter.getEventHandlingLogMessage(event));
+        handleMapEvent(event.getPerson());
+    }
+
+    @Subscribe
+    private void handleChangeImageEvent(ChangeImageEvent event) {
+        logger.info(LogsCenter.getEventHandlingLogMessage(event));
+        handleImageEvent(event.getPerson());
     }
 }

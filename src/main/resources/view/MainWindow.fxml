@@ -9,12 +9,11 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" >
   <stylesheets>
     <URL value="@DarkTheme.css" />
     <URL value="@Extensions.css" />
   </stylesheets>
-
   <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
     <Menu mnemonicParsing="false" text="File">
       <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Exit" />
@@ -45,7 +44,7 @@
       <StackPane fx:id="personListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
     </VBox>
 
-    <StackPane fx:id="browserPlaceholder" prefWidth="340" >
+    <StackPane fx:id="infoPlaceholder" prefWidth="340" >
       <padding>
         <Insets top="10" right="10" bottom="10" left="10" />
       </padding>

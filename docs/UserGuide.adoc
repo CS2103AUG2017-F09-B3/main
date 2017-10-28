@@ -1,3 +1,4 @@
+= AddressBook Level 4 - User Guide
 PocketBook - User Guide
 :toc:
 :toc-title:
@@ -96,10 +97,11 @@ Edits the name of the 2nd person to be `Betsy Crower` and clears all existing ta
 * `e 2 n/Donald Pua t/` +
 Edits the name of the 2nd person to be `Donald Pua` and clears all existing tags.
 
-=== Locating persons by name: `find`
+=== Locating persons by name or tag: `find`
 
 Finds persons whose names contain any of the given keywords. +
-Format: `find KEYWORD [MORE_KEYWORDS]`
+Can also be used to find all members of a specified tag. +
+Format: `find (KEYWORD [MORE_KEYWORDS] | t/KEYWORD)`
 	`f KEYWORD [MORE_KEYWORDS]`
 
 ****
@@ -108,6 +110,8 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * Only the name is searched.
 * Only full words will be matched e.g. `Han` will not match `Hans`
 * Persons matching at least one keyword will be returned (i.e. `OR` search). e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
+* Only one tag may be searched for at a time e.g. `find t\friends t\colleagues` is invalid
+* The command cannot search by both tag and name simultaneously, e.g. `find John t\enemies` is invalid
 ****
 
 Examples:
@@ -116,24 +120,10 @@ Examples:
 Returns `john` and `John Doe`
 * `find Betsy Tim John` +
 Returns any person having names `Betsy`, `Tim`, or `John`
+* `find t/enemies`
+Returns all persons in the tag `enemies`
 * `f Alpha Bravo Charlie` +
 Returns any person having names `Alpha`, `Bravo`, or `Charlie`
-
-=== Showing all persons in a tag: `show`
-
-Finds all persons in the tag with the name matching the given keyword. +
-Format: `find KEYWORD`
-
-****
-* Only persons in the tag matching the entered keyword exactly will be shown, so searching `friend` will not show persons with the tag `friends`
-* The search is case sensitive, so searching for `Friends` will not show persons with the tag `friends`
-* The command only supports searching for one keyword at a time, so searching for `friends neighbours` will yield neither `friends` nor `neighbours`
-****
-
-Examples:
-
-* `show friends` +
-Returns all persons tagged as `friends`
 
 === Deleting one or more person(s) : `delete` 'd'
 
@@ -157,20 +147,6 @@ Deletes the 2nd person in the address book.
 Deletes the 1st, 2nd and 3rd persons in the results of the `find` command.
 `d 3` +
 Deletes the 3rd person in the results of the `find` command.
-
-=== Changing the Song : `nextsong`
-
-Change the song to the next song on the playlist. +
-Format: `nextsong`
-	`ns`
-****
-* Plays the next song on the playlist
-****
-
-Examples:
-
-* `nextsong`
-Changes to the next Song in the playlist
 
 === Selecting a person : `select`
 
@@ -226,6 +202,25 @@ Removes the tag 'friends' from all persons in addressbook
 * `removetag NUS` +
 Removes the tag 'NUS' from all persons in addressbook
 
+=== Adding a Profile picture to a user : `image`
+
+Opens a window for you to choose which picture you would like to add as a profile picture to the selected person or removes the profile picture of the selected person. +
+Format: `image INDEX` `image INDEX remove`
+
+****
+* Opens a window to choose a profile picture for the selected person.
+* The index refers to the index number shown in the most recent listing.
+* The index *must be a positive integer* `1, 2, 3, ...`
+****
+
+Examples:
+
+* `image 1` +
+Opens a window for user to choose picture for 1st person in list.
+
+* `image 1 remove` +
+Removes profile picture from the selected person.
+
 === Showing address on Google Maps : `map`
 
 Shows a person's address on Google Maps on browser
@@ -278,8 +273,7 @@ Pressing the kbd:[&uarr;] and kbd:[&darr;] arrows will display the previous and 
 ====
 
 // tag::undoredo[]
-=== Undoing previous command : `undo`
-			       `u`
+=== Undoing previous command : `undo` `u`
 
 Restores the address book to the state before the previous _undoable_ command was executed. +
 Format: `undo`
@@ -368,8 +362,9 @@ e.g. `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 123466
 e.g. `delete 3`
 * *Edit* : `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]...` +
 e.g. `edit 2 n/James Lee e/jameslee@example.com`
-* *Find* : `find KEYWORD [MORE_KEYWORDS]` +
-e.g. `find James Jake`
+* *Find* : `find (KEYWORD [MORE_KEYWORDS] | t\KEYWORD)` +
+e.g. `find James Jake` +
+e.g. `find t/friends`
 * *List* : `list`
 * *Help* : `help`
 * *Select* : `select INDEX` +

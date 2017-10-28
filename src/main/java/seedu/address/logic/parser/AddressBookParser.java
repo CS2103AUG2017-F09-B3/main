@@ -18,17 +18,17 @@ import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.FuzzyfindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.HistoryCommand;
+import seedu.address.logic.commands.ImageCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.MapCommand;
-import seedu.address.logic.commands.NextSongCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.RemarkCommand;
 import seedu.address.logic.commands.RemoveTagCommand;
 import seedu.address.logic.commands.SelectCommand;
-import seedu.address.logic.commands.ShowCommand;
 import seedu.address.logic.commands.SortCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.ui.CommandBox;
 
 /**
  * Parses user input.
@@ -58,32 +58,41 @@ public class AddressBookParser {
         switch (commandWord) {
 
         case EmailCommand.COMMAND_WORD:
-            return new EmailCommandParser().parse(arguments);
+            Command emailCommand = new EmailCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return emailCommand;
 
         case SortCommand.COMMAND_WORD:
             return new SortCommandParser().parse(arguments);
 
-        case NextSongCommand.COMMAND_WORD:
-            return new NextSongCommand();
-
         case AddCommand.COMMAND_WORD:
         case AddCommand.COMMAND_ALIAS:
-            return new AddCommandParser().parse(arguments);
+            Command addCommand = new AddCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return addCommand;
 
         case EditCommand.COMMAND_WORD:
         case EditCommand.COMMAND_ALIAS:
-            return new EditCommandParser().parse(arguments);
+            Command editCommand = new EditCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return editCommand;
 
         case SelectCommand.COMMAND_WORD:
         case SelectCommand.COMMAND_ALIAS:
-            return new SelectCommandParser().parse(arguments);
+            Command selectCommand = new SelectCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return selectCommand;
 
         case DeleteCommand.COMMAND_WORD:
         case DeleteCommand.COMMAND_ALIAS:
-            return new DeleteCommandParser().parse(arguments);
+            Command deleteCommand = new DeleteCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return deleteCommand;
 
         case RemoveTagCommand.COMMAND_WORD:
-            return new RemoveTagCommandParser().parse(arguments);
+            Command removeTagCommand = new RemoveTagCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return removeTagCommand;
 
         case ClearCommand.COMMAND_WORD:
         case ClearCommand.COMMAND_ALIAS:
@@ -91,15 +100,13 @@ public class AddressBookParser {
 
         case FindCommand.COMMAND_WORD:
         case FindCommand.COMMAND_ALIAS:
-            return new FindCommandParser().parse(arguments);
+            Command findCommand = new FindCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return findCommand;
 
         case FuzzyfindCommand.COMMAND_WORD:
         case FuzzyfindCommand.COMMAND_ALIAS:
             return new FuzzyfindCommandParser().parse(arguments);
-
-        case ShowCommand.COMMAND_WORD:
-        case ShowCommand.COMMAND_ALIAS:
-            return new ShowCommandParser().parse(arguments);
 
         case ListCommand.COMMAND_WORD:
         case ListCommand.COMMAND_ALIAS:
@@ -124,13 +131,22 @@ public class AddressBookParser {
             return new RedoCommand();
 
         case RemarkCommand.COMMAND_WORD:
-            return new RemarkCommandParser().parse(arguments);
+            Command remarkCommand = new RemarkCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return remarkCommand;
 
         case BirthdayCommand.COMMAND_WORD:
-            return new BirthdayCommandParser().parse(arguments);
+            Command birthdayCommand = new BirthdayCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return birthdayCommand;
 
         case MapCommand.COMMAND_WORD:
-            return new MapCommandParser().parse(arguments);
+            Command mapCommand = new MapCommandParser().parse(arguments);
+            CommandBox.setAddSuggestion(userInput);
+            return mapCommand;
+
+        case ImageCommand.COMMAND_WORD:
+            return new ImageCommandParser().parse(arguments);
 
         default:
             throw new ParseException(MESSAGE_UNKNOWN_COMMAND);

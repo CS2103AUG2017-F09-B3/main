@@ -1,11 +1,9 @@
 package seedu.address;
 
 import java.awt.AWTException;
-import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
-import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,6 +18,8 @@ import com.google.common.eventbus.Subscribe;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import seedu.address.commons.core.Config;
 import seedu.address.commons.core.EventsCenter;
@@ -52,7 +52,7 @@ import seedu.address.ui.UiManager;
  */
 public class MainApp extends Application {
 
-    public static final Version VERSION = new Version(0, 6, 0, true);
+    public static final Version VERSION = new Version(1, 3, 0, true);
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
 
@@ -85,8 +85,6 @@ public class MainApp extends Application {
 
         startTray();
 
-        Sound.music();
-
         initEventsCenter();
     }
 
@@ -99,10 +97,10 @@ public class MainApp extends Application {
             System.out.println("SystemTray is not supported");
             return;
         }
-        Image image = Toolkit.getDefaultToolkit().getImage("src/main/resources/images/address_book_15.png");
+        Image image = new Image("images/address_book_15.png");
 
         final PopupMenu popup = new PopupMenu();
-        final TrayIcon trayIcon = new TrayIcon(image, "PocketBook", popup);
+        final TrayIcon trayIcon = new TrayIcon(SwingFXUtils.fromFXImage(image, null), "PocketBook", popup);
         final SystemTray tray = SystemTray.getSystemTray();
 
         MenuItem exitItem = new MenuItem("Exit");
