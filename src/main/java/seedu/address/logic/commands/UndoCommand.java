@@ -91,12 +91,6 @@ public class UndoCommand extends Command {
                 && this.numUndo == (((UndoCommand) other).numUndo)); // state check
     }
 
-    @Override
-    public boolean equals(Object other) {
-        return other == this // short circuit if same object
-                || (other instanceof UndoCommand // instanceof handles nulls
-                && this.numUndo == (((UndoCommand) other).numUndo)); // state check
-    }
     //@@author
     @Override
     public void setData(Model model, CommandHistory commandHistory, UndoRedoStack undoRedoStack) {

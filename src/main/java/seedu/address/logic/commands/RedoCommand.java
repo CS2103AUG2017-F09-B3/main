@@ -93,12 +93,6 @@ public class RedoCommand extends Command {
                 && this.numRedo == (((RedoCommand) other).numRedo)); // state check
     }
 
-    @Override
-    public boolean equals(Object other) {
-        return other == this // short circuit if same object
-                || (other instanceof RedoCommand // instanceof handles nulls
-                && this.numRedo == (((RedoCommand) other).numRedo)); // state check
-    }
     //@@author
     @Override
     public void setData(Model model, CommandHistory commandHistory, UndoRedoStack undoRedoStack) {

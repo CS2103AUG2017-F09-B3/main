@@ -334,7 +334,8 @@ public class AddCommandParser implements Parser<AddCommand> {
     private boolean containsAnyPrefix(String args) {
         return args.contains(PREFIX_NAME.toString()) || args.contains(PREFIX_ADDRESS.toString())
             || args.contains(PREFIX_EMAIL.toString()) || args.contains(PREFIX_PHONE.toString())
-            || args.contains(PREFIX_REMARK.toString()) || args.contains(PREFIX_TAG.toString());
+            || args.contains(PREFIX_REMARK.toString()) || args.contains(PREFIX_TAG.toString())
+            || args.contains(PREFIX_BIRTHDAY.toString());
     }
     //@@author
     /**
