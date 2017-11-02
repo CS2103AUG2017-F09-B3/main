@@ -117,8 +117,9 @@ public class PersonBuilder {
         return this;
     }
 
+    //@@author justintkj
     /**
-     * Sets the {@code Email} of the {@code Person} that we are building.
+     * Sets the {@code Birthday} of the {@code Person} that we are building.
      */
     public PersonBuilder withBirthday (String birthday) {
         try {
@@ -128,6 +129,17 @@ public class PersonBuilder {
         }
         return this;
     }
+    //@@author
+
+    //@@author bokwoon95
+    /**
+     * Sets the {@code Remark} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withRemark (String remark) {
+        this.person.setRemark(new Remark(remark));
+        return this;
+    }
+    //@@author
 
     public Person build() {
         return this.person;
