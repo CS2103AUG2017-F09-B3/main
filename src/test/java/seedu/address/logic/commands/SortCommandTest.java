@@ -15,13 +15,17 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 
+//@@author justintkj
+/**
+ * Contains integration tests (interaction with the Model) for {@code SortCommand}.
+ */
 public class SortCommandTest {
 
     public static final String SORT_NAME_ARG = "name";
     public static final String SORT_EMAIL_ARG = "email";
     public static final String SORT_ADDRESS_ARG = "address";
     public static final String SORT_NUM_ARG = "number";
-    public static final String SORT_NUM_ARG_CAMELCASE = "NuM";
+    public static final String SORT_NUM_ARG_CAMELCASE = "NuMBeR";
     private Model model;
     private Model expectedModel;
     private SortCommand sortCommand;
@@ -50,11 +54,18 @@ public class SortCommandTest {
         sortCommand.setData(model, new CommandHistory(), new UndoRedoStack());
         assertCommandSuccess(sortCommand, model, SortCommand.MESSAGE_SORT_SUCCESS + SORT_ADDRESS_ARG, expectedModel);
 
-        //Sort num -> command parsed successful
+        //Sort number -> command parsed successful
         expectedModel = new ModelManager(getSortedNumAddressBook(), new UserPrefs());
         sortCommand = new SortCommand(SORT_NUM_ARG);
         sortCommand.setData(model, new CommandHistory(), new UndoRedoStack());
         assertCommandSuccess(sortCommand, model, SortCommand.MESSAGE_SORT_SUCCESS + SORT_NUM_ARG, expectedModel);
+
+        //Sort number CamelCase -> command parsed successful
+        expectedModel = new ModelManager(getSortedNumAddressBook(), new UserPrefs());
+        sortCommand = new SortCommand(SORT_NUM_ARG);
+        sortCommand.setData(model, new CommandHistory(), new UndoRedoStack());
+        assertCommandSuccess(sortCommand, model, SortCommand.MESSAGE_SORT_SUCCESS + SORT_NUM_ARG, expectedModel);
+
     }
 }
 

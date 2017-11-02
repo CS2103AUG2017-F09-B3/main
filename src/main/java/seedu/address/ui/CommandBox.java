@@ -28,21 +28,19 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 
-
+//@@author justintkj
 /**
  * The UI component that is responsible for receiving user command inputs.
  */
 public class CommandBox extends UiPart<Region> {
 
-    public static final int ONE_INDEX = 1;
+    public static final String AUTOCOMPLETE_FILE_NAME = "Autocomplete.xml";
     public static final String ERROR_STYLE_CLASS = "error";
     private static final String FXML = "CommandBox.fxml";
-    private static ArrayList<String> possibleSuggestionAdd = new ArrayList<String> ();
-    private static String[] possibleSuggestion = {"add", "clear", "list",
-        "edit", "find", "delete", "select", "history", "undo", "redo", "exit", "sort", "sort name",
-        "sort num", "sort email", "sort address", "sort remark"};
+    private static String[] possibleSuggestion = {"add", "birthday", "clear", "list", "help", "removetag", "image",
+        "edit", "find", "delete", "select", "favourite", "history", "undo", "redo", "email", "sort", "sort name", "map",
+        "sort number", "sort email", "sort address", "sort remark", "sort birthday", "exit"};
     private static ArrayList<String> mainPossibleSuggestion = new ArrayList<String>(Arrays.asList(possibleSuggestion));
-
     private final Logger logger = LogsCenter.getLogger(CommandBox.class);
     private final Logic logic;
     private ListElementPointer historySnapshot;
@@ -50,7 +48,6 @@ public class CommandBox extends UiPart<Region> {
     @FXML
     private TextField commandTextField;
     private ArrayList<String> prevText = new ArrayList<String>();
-
     private AutoCompletionBinding autocompletionbinding;
     public CommandBox(Logic logic) {
         super(FXML);
@@ -58,7 +55,6 @@ public class CommandBox extends UiPart<Region> {
         // calls #setStyleToDefault() whenever there is a change to the text of the command box.
         commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
         historySnapshot = logic.getHistorySnapshot();
-        System.out.println(commandTextField.getText());
         try {
             XMLDecoder e = new XMLDecoder(new FileInputStream("Autocomplete.xml"));
             mainPossibleSuggestion = ((ArrayList<String>) e.readObject());
@@ -73,7 +69,7 @@ public class CommandBox extends UiPart<Region> {
         }
         autocompletionbinding = TextFields.bindAutoCompletion(commandTextField, mainPossibleSuggestion);
     }
-
+    //@@author
     /**
      * Handles the key press event, {@code keyEvent}.
      */
@@ -92,36 +88,35 @@ public class CommandBox extends UiPart<Region> {
             navigateToNextInput();
             break;
 
-        case LEFT:
-            keyEvent.consume();
-            prevText.add(commandTextField.getText());
-            commandTextField.setText("");
-            break;
-
-        case RIGHT:
-            keyEvent.consume();
-            if (!prevText.isEmpty()) {
-                int lastIndex = prevText.size() - ONE_INDEX;
-                commandTextField.setText(prevText.remove(lastIndex));
-            }
-            break;
-
         default:
 
         }
     }
-    public static void setAddSuggestion(String commandWord) {
+    //@@author justintkj
+
+    /**
+     * Adds in a valid command string into autocomplete.xml storage
+     * @param commandWord
+     * @throws CommandException if autocomplete.xml cannot be made.
+     */
+    public static void setAddSuggestion(String commandWord) throws CommandException {
         if (!mainPossibleSuggestion.contains(commandWord)) {
             try {
-                mainPossibleSuggestion.add(commandWord);
-                XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("Autocomplete.xml")));
+                mainPossibleSuggestion.add(commandWord.trim());
+                XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(AUTOCOMPLETE_FILE_NAME)));
                 e.writeObject(mainPossibleSuggestion);
                 e.close();
             } catch (Exception ex) {
-                System.out.println("error"); //to be updated
+                try {
+                    File file = new File("Autocomplete.xml");
+                    file.createNewFile();
+                } catch (IOException ioe) {
+                    throw new CommandException("Unable to create file Autocomplete.xml");
+                }
             }
         }
     }
+    //@@author
     /**
      * Updates the text field with the previous input in {@code historySnapshot},
      * if there exists a previous input in {@code historySnapshot}

@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 
+//@@author liliwei25
 /**
  * Creates a birthday notification
  */

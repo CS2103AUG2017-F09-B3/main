@@ -15,6 +15,7 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.person.ReadOnlyPerson;
 
+//@@author justintkj
 /**
  * Email a person chosen by index
  */
@@ -25,7 +26,7 @@ public class EmailCommand extends Command {
 
     public static final String MESSAGE_SUCCESS = "Email sent to :";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Email the person identified"
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Email the person identified "
             + "by the index number used in the last person listing. "
             + "An email will be sent to the chosen person.\n"
             + "Parameters: INDEX (must be a positive integer),SUBJECT,MESSAGE "
@@ -89,11 +90,26 @@ public class EmailCommand extends Command {
             transport.connect(host, user, pass);
             transport.sendMessage(msg, msg.getAllRecipients());
             transport.close();
-            System.out.println("message send successfully");
 
         } catch (Exception ex) {
             throw new CommandException("Incorrect Email format");
         }
         return new CommandResult("Email successfully sent to : " + personToEmail.getName());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
+        }
+        // instanceof handles nulls
+        if (!(other instanceof EmailCommand)) {
+            return false;
+        }
+
+        // state check
+        EmailCommand e = (EmailCommand) other;
+        return index.equals(e.index) && subject.equals(e.subject) && message.equals(e.message);
     }
 }

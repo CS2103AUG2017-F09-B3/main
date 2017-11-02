@@ -42,7 +42,34 @@ import seedu.address.testutil.PersonBuilder;
 
 public class AddCommandParserTest {
     private AddCommandParser parser = new AddCommandParser();
+    //@@author justintkj
+    @Test
+    public void parse_allFieldsPresentAlternative_success() {
+        Person expectedPerson = new PersonBuilder().withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB)
+                .withEmail(VALID_EMAIL_BOB).withAddress(VALID_ADDRESS_BOB)
+                .withTags().withBirthday("11-11-2010").build();
+        //Valid input format - Accepted
+        assertParseSuccess(parser, "Bob Choo, 22222222 Block 123 Bobby Street 3 #01-123 "
+                + "bob@example.com" + " 11-11-2010", new AddCommand(expectedPerson));
 
+        //Multiple phone, 1st Phone accepted - Accepted
+        assertParseSuccess(parser, "Bob Choo, 22222222 33333333 Block 123 Bobby Street 3 #01-123 "
+                + "bob@example.com" + " 11-11-2010", new AddCommand(expectedPerson));
+
+        //Multiple Email, 1st Email accepted - Accepted
+        assertParseSuccess(parser, "Bob Choo, 22222222 Block 123 Bobby Street 3 #01-123 "
+                + "bob@example.com  pop@example.com" + " 11-11-2010", new AddCommand(expectedPerson));
+
+        //Multiple Addresses, 1st Address accepted - Accepted
+        assertParseSuccess(parser, "Bob Choo, 22222222 Block 123 Bobby Street 3 #01-123 "
+                + "bob@example.com  Block 122 Poppy Street 88 #11-111" + " 11-11-2010", new AddCommand(expectedPerson));
+
+        //Multiple Birthdays, 1st Birthday accepted - Accepted
+        assertParseSuccess(parser, "Bob Choo, 22222222 Block 123 Bobby Street 3 #01-123 "
+                + "bob@example.com " + " 11-11-2010" + " 12-12-2012", new AddCommand(expectedPerson));
+
+    }
+    //@@author
     @Test
     public void parse_allFieldsPresent_success() {
         Person expectedPerson = new PersonBuilder().withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB)
@@ -72,6 +99,32 @@ public class AddCommandParserTest {
                         + EMAIL_DESC_BOB + ADDRESS_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
                 new AddCommand(expectedPersonMultipleTags));
     }
+    //@@author justintkj
+    @Test
+    public void parse_altcompulsoryFieldMissing_failure() {
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE);
+
+        // missing name field
+        assertParseFailure(parser, "22222222 Block 123 Bobby Street 3 #01-123 "
+                + "bob@example.com" + " 11-11-2010", "Missing Name!\n" + AddCommand.MESSAGE_USAGE_ALT);
+        // missing phone field
+        assertParseFailure(parser, "JohnDoe, Block 123 Bobby Street 3 #01-123 "
+                + "bob@example.com" + " 11-11-2010", "Number should be 8 digits long!\n"
+                + AddCommand.MESSAGE_USAGE_ALT);
+        // missing Address/Block field
+        assertParseFailure(parser, "JohnDoe, 11111111 Bobby Street 3 #01-123 "
+                + "bob@example.com" + " 11-11-2010", "invalid address, Block Number. \nExample: Block 123"
+                + AddCommand.MESSAGE_USAGE_ALT);
+        // missing Address/Street field
+        assertParseFailure(parser, "JohnDoe, 11111111 Block 123 #01-123 "
+                + "bob@example.com" + " 11-11-2010", "invalid address, Street. \nExample: Jurong Street 11"
+                + AddCommand.MESSAGE_USAGE_ALT);
+        // missing Address/Unit field
+        assertParseFailure(parser, "JohnDoe, 11111111 Block 123 Bobby Street 3 "
+                + "bob@example.com" + " 11-11-2010", "invalid address, Unit. \n Example: #01-12B"
+                + AddCommand.MESSAGE_USAGE_ALT);
+    }
+    //@@author
 
     @Test
     public void parse_optionalFieldsMissing_success() {

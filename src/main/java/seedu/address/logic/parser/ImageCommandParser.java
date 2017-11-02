@@ -7,6 +7,7 @@ import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.logic.commands.ImageCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
+//@@author liliwei25
 /**
  * Parses input arguments and creates a new ImageCommand object
  */
@@ -20,7 +21,7 @@ public class ImageCommandParser implements Parser<ImageCommand> {
         String[] splitArgs = args.trim().split(" ");
         try {
             Index index = ParserUtil.parseIndex(splitArgs[0]);
-            if (splitArgs.length > 1 && splitArgs[1].equals("remove")) {
+            if (splitArgs.length > 1 && splitArgs[1].toLowerCase().equals("remove")) {
                 return new ImageCommand(index, true);
             } else {
                 return new ImageCommand(index, false);

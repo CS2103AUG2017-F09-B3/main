@@ -14,6 +14,7 @@ import seedu.address.model.person.exceptions.PersonNotFoundException;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.tag.UniqueTagList;
 
+//@@author liliwei25
 /**
  * Removes the specified tag from all persons in addressbook
  */
@@ -51,7 +52,7 @@ public class RemoveTagCommand extends UndoableCommand {
                 updatedTags.remove(target);
                 Person editedPerson = new Person(person.getName(), person.getPhone(), person.getEmail(),
                         person.getAddress(), person.getRemark(), person.getBirthday(), updatedTags,
-                        person.getPicture());
+                        person.getPicture(), person.getFavourite());
 
                 try {
                     model.updatePerson(person, editedPerson);

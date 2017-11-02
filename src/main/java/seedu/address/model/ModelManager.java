@@ -52,10 +52,13 @@ public class ModelManager extends ComponentManager implements Model {
         addressBook.resetData(newData);
         indicateAddressBookChanged();
     }
+
     @Override
     public void sortPerson(String sortType) {
         addressBook.sortPersons(sortType);
+        indicateAddressBookChanged();
     }
+
     @Override
     public ReadOnlyAddressBook getAddressBook() {
         return addressBook;
@@ -98,6 +101,12 @@ public class ModelManager extends ComponentManager implements Model {
     public ObservableList<ReadOnlyPerson> getFilteredPersonList() {
         return FXCollections.unmodifiableObservableList(filteredPersons);
     }
+    //@@author justintkj
+    @Override
+    public void updateListToShowAll() {
+        filteredPersons.setPredicate(null);
+    }
+    //@@author
 
     @Override
     public void updateFilteredPersonList(Predicate<ReadOnlyPerson> predicate) {
@@ -105,6 +114,7 @@ public class ModelManager extends ComponentManager implements Model {
         filteredPersons.setPredicate(predicate);
     }
 
+    //@@author liliwei25
     @Override
     public void removeTag(Tag target) throws UniqueTagList.TagNotFoundException {
         addressBook.removeTag(target);
@@ -120,6 +130,7 @@ public class ModelManager extends ComponentManager implements Model {
     public void changeImage(ReadOnlyPerson target) throws PersonNotFoundException {
         raise(new ChangeImageEvent(target));
     }
+    //@@author
 
     @Override
     public boolean equals(Object obj) {

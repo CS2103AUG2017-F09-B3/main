@@ -13,6 +13,7 @@ import seedu.address.model.person.ReadOnlyPerson;
 import seedu.address.model.person.exceptions.DuplicatePersonException;
 import seedu.address.model.person.exceptions.PersonNotFoundException;
 
+//@@author liliwei25
 /**
  * Command to add/edit/remove image of Person
  */
@@ -47,7 +48,7 @@ public class ImageCommand extends UndoableCommand {
         if (remove) {
             Person editedPerson = new Person(personToEdit.getName(), personToEdit.getPhone(), personToEdit.getEmail(),
                     personToEdit.getAddress(), personToEdit.getRemark(), personToEdit.getBirthday(),
-                    personToEdit.getTags(), new ProfilePicture(DEFAULT));
+                    personToEdit.getTags(), new ProfilePicture(DEFAULT), personToEdit.getFavourite());
             try {
                 model.updatePerson(personToEdit, editedPerson);
             } catch (PersonNotFoundException | DuplicatePersonException pnfe) {
@@ -63,6 +64,7 @@ public class ImageCommand extends UndoableCommand {
             }
         }
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        model.updateListToShowAll();
         return new CommandResult(String.format(MESSAGE_IMAGE_SUCCESS, personToEdit));
     }
 

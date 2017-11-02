@@ -62,6 +62,8 @@ public class MainApp extends Application {
     protected Model model;
     protected Config config;
     protected UserPrefs userPrefs;
+    protected TrayIcon trayIcon;
+    protected SystemTray tray;
 
     @Override
     public void init() throws Exception {
@@ -88,6 +90,7 @@ public class MainApp extends Application {
         initEventsCenter();
     }
 
+    //@@author liliwei25
     /**
      * Start a tray icon running in background
      */
@@ -99,9 +102,9 @@ public class MainApp extends Application {
         }
         Image image = new Image("images/address_book_15.png");
 
-        final PopupMenu popup = new PopupMenu();
-        final TrayIcon trayIcon = new TrayIcon(SwingFXUtils.fromFXImage(image, null), "PocketBook", popup);
-        final SystemTray tray = SystemTray.getSystemTray();
+        PopupMenu popup = new PopupMenu();
+        trayIcon = new TrayIcon(SwingFXUtils.fromFXImage(image, null), "PocketBook", popup);
+        tray = SystemTray.getSystemTray();
 
         MenuItem exitItem = new MenuItem("Exit");
         exitItem.addActionListener(new ActionListener() {
@@ -149,6 +152,8 @@ public class MainApp extends Application {
             System.out.println("TrayIcon could not be added.");
         }
     }
+    //@@author
+
     private String getApplicationParameter(String parameterName) {
         Map<String, String> applicationParameters = getParameters().getNamed();
         return applicationParameters.get(parameterName);
@@ -271,6 +276,7 @@ public class MainApp extends Application {
         } catch (IOException e) {
             logger.severe("Failed to save preferences " + StringUtil.getDetails(e));
         }
+        tray.remove(trayIcon);
         Platform.exit();
         System.exit(0);
     }

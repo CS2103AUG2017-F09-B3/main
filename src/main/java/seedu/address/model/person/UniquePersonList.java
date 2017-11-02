@@ -39,13 +39,14 @@ public class UniquePersonList implements Iterable<Person> {
         requireNonNull(toCheck);
         return internalList.contains(toCheck);
     }
-
+    //@@author justintkj
     /**
      * Sorts the internalList as declared by the arguments
      */
     public void sort(String sortType) {
         if (sortType.equals(SORTNAME_ARG)) {
-            Collections.sort(internalList);
+            Collections.sort(internalList, (Person p1, Person p2) ->
+                p1.getName().toString().compareTo(p2.getName().toString()));
         } else if (sortType.equals(SORTNUM_ARG)) {
             Collections.sort(internalList, (Person p1, Person p2) ->
                 p1.getPhone().toString().compareTo(p2.getPhone().toString()));
@@ -63,6 +64,7 @@ public class UniquePersonList implements Iterable<Person> {
                 p1.getBirthday().toString().compareTo(p2.getBirthday().toString()));
         }
     }
+    //@@author
 
     /**
      * Adds a person to the list.

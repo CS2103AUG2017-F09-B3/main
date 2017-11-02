@@ -6,6 +6,7 @@ import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Birthday;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Favourite;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -28,6 +29,7 @@ public class PersonBuilder {
     public static final String DEFAULT_TAGS = "friends";
     public static final String DEFAULT_PICTURE = "profiles/default.png";
     public static final String DEFAULT_BIRTHDAY = "";
+    public static final String DEFAULT_FAVOURITE = "false";
     private Person person;
 
     public PersonBuilder() {
@@ -40,8 +42,9 @@ public class PersonBuilder {
             Birthday defaultBirthday = new Birthday(DEFAULT_BIRTHDAY);
             Set<Tag> defaultTags = SampleDataUtil.getTagSet(DEFAULT_TAGS);
             ProfilePicture defaultPicture = new ProfilePicture(DEFAULT_PICTURE);
+            Favourite defaultFavourite = new Favourite(DEFAULT_FAVOURITE);
             this.person = new Person(defaultName, defaultPhone, defaultEmail, defaultAddress, defaultRemark,
-                    defaultBirthday, defaultTags, defaultPicture);
+                    defaultBirthday, defaultTags, defaultPicture, defaultFavourite);
         } catch (IllegalValueException ive) {
             throw new AssertionError("Default person's values are invalid.");
         }
@@ -110,6 +113,18 @@ public class PersonBuilder {
             this.person.setEmail(new Email(email));
         } catch (IllegalValueException ive) {
             throw new IllegalArgumentException("email is expected to be unique.");
+        }
+        return this;
+    }
+
+    /**
+     * Sets the {@code Email} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withBirthday (String birthday) {
+        try {
+            this.person.setBirthday(new Birthday(birthday));
+        } catch (IllegalValueException ive) {
+            throw new IllegalArgumentException("birthday is expected to be unique.");
         }
         return this;
     }

@@ -1,12 +1,14 @@
 package seedu.address.ui;
 
+import java.awt.FileDialog;
+import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 
 import java.util.logging.Logger;
 
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.google.common.eventbus.Subscribe;
@@ -52,6 +54,7 @@ public class MainWindow extends UiPart<Region> {
     private Logic logic;
 
     // Independent Ui parts residing in this Ui container
+    private BrowserPanel browserPanel;
     private PersonInfoPanel personInfoPanel;
     private PersonListPanel personListPanel;
     private Config config;
@@ -77,6 +80,9 @@ public class MainWindow extends UiPart<Region> {
 
     @FXML
     private StackPane statusbarPlaceholder;
+
+    @FXML
+    private StackPane browserPlaceholder;
 
     public MainWindow(Stage primaryStage, Config config, UserPrefs prefs, Logic logic) {
         super(FXML);
@@ -145,6 +151,9 @@ public class MainWindow extends UiPart<Region> {
     void fillInnerParts() {
         personInfoPanel = new PersonInfoPanel();
         infoPlaceholder.getChildren().add(personInfoPanel.getRoot());
+
+        browserPanel = new BrowserPanel();
+        browserPlaceholder.getChildren().add(browserPanel.getRoot());
 
         personListPanel = new PersonListPanel(logic.getFilteredPersonList());
         personListPanelPlaceholder.getChildren().add(personListPanel.getRoot());
@@ -225,6 +234,7 @@ public class MainWindow extends UiPart<Region> {
         raise(new ExitAppRequestEvent());
     }
 
+    //@@author liliwei25
     /**
      * Opens the map window.
      */
@@ -237,25 +247,50 @@ public class MainWindow extends UiPart<Region> {
      * Opens file browser.
      */
     private void handleImageEvent(ReadOnlyPerson person) {
-        JDialog parent = new JDialog();
-        JFileChooser fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Any Image files", "jpg", "png", "jpeg");
-        fileChooser.setFileFilter(filter);
-        fileChooser.setCurrentDirectory(new File("data"));
-        parent.setAlwaysOnTop(true);
-        parent.setAutoRequestFocus(true);
-        int result = fileChooser.showDialog(parent, "Select Image");
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            try {
-                imageStorage.saveImage(selectedFile, person.getName().toString());
-            } catch (IOException io) {
-                logger.warning("failed to copy image");
+        String os = System.getProperty("os.name");
+        if (os.equals("Mac OS X")) {
+            FileDialog fileChooser = new FileDialog((Frame) null);
+            fileChooser.setAlwaysOnTop(true);
+            fileChooser.setAutoRequestFocus(true);
+            fileChooser.setFile("*.jpg;*.jpeg;*.png");
+            fileChooser.setDirectory(new File("data").getPath());
+            fileChooser.setVisible(true);
+            String filename = fileChooser.getDirectory() + fileChooser.getFile();
+            if (fileChooser.getFile() != null) {
+                File selectedFile = new File(filename);
+                try {
+                    imageStorage.saveImage(selectedFile, person.getName().toString());
+                } catch (IOException io) {
+                    logger.warning("failed to copy image");
+                }
+                person.setImage(person.getName().toString() + ".png");
             }
-            person.setImage(person.getName().toString() + ".png");
+        } else {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                logger.warning("Unable to open file chooser");
+            }
+            Frame parent = new Frame();
+            parent.setAlwaysOnTop(true);
+            parent.setAutoRequestFocus(true);
+            JFileChooser fileChooser = new JFileChooser();
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("Any Image files", "jpg", "png", "jpeg");
+            fileChooser.setFileFilter(filter);
+            fileChooser.setCurrentDirectory(new File("data"));
+            int result = fileChooser.showDialog(parent, "Select Image");
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                try {
+                    imageStorage.saveImage(selectedFile, person.getName().toString());
+                } catch (IOException io) {
+                    logger.warning("failed to copy image");
+                }
+                person.setImage(person.getName().toString() + ".png");
+            }
         }
     }
+    //@@author
 
     public PersonListPanel getPersonListPanel() {
         return this.personListPanel;
@@ -267,15 +302,23 @@ public class MainWindow extends UiPart<Region> {
         handleHelp();
     }
 
+    //@@author liliwei25
     @Subscribe
     private void handleMapPanelEvent(MapPersonEvent event) {
         logger.info(LogsCenter.getEventHandlingLogMessage(event));
         handleMapEvent(event.getPerson());
     }
+    //@@author
 
+    void releaseResources() {
+        browserPanel.freeResources();
+    }
+
+    //@@author liliwei25
     @Subscribe
     private void handleChangeImageEvent(ChangeImageEvent event) {
         logger.info(LogsCenter.getEventHandlingLogMessage(event));
         handleImageEvent(event.getPerson());
     }
+    //@@author
 }

@@ -48,12 +48,15 @@ public class AddressBook implements ReadOnlyAddressBook {
         this();
         resetData(toBeCopied);
     }
-
-    //// list overwrite operations
+    //@@author justintkj
+    /**
+     *     Sort Persons according to sortType
+     */
     public void sortPersons(String sortType) {
         persons.sort(sortType);
+        syncMasterTagListWith(persons);
     }
-
+    //@@author
     public void setPersons(List<? extends ReadOnlyPerson> persons) throws DuplicatePersonException {
         this.persons.setPersons(persons);
     }
@@ -175,10 +178,11 @@ public class AddressBook implements ReadOnlyAddressBook {
         tags.add(t);
     }
 
+    //@@author liliwei25
     public void removeTag(Tag t) throws UniqueTagList.TagNotFoundException {
         tags.remove(t);
     }
-
+    //@@author
     //// util methods
 
     @Override

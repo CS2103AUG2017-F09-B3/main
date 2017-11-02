@@ -6,6 +6,7 @@ import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.logic.commands.SortCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
+//@@author justintkj
 /**
  * Parses input arguments and creates a new SortCommand object
  */
@@ -18,6 +19,7 @@ public class SortCommandParser implements Parser<SortCommand> {
      */
     public SortCommand parse(String args) throws ParseException {
         try {
+            args = args.toLowerCase();
             String toSort = ParserUtil.parseSortType(args);
             return new SortCommand(toSort);
         } catch (IllegalValueException ive) {

@@ -26,12 +26,13 @@ public class Person implements ReadOnlyPerson, Comparable<Person> {
     private ObjectProperty<Birthday> birthday;
     private ObjectProperty<UniqueTagList> tags;
     private ObjectProperty<ProfilePicture> image;
+    private ObjectProperty<Favourite> favourite;
 
     /**
      * Every field must be present and not null.
      */
     public Person(Name name, Phone phone, Email email, Address address, Remark remark, Birthday birthday,
-                  Set<Tag> tags, ProfilePicture image) {
+                  Set<Tag> tags, ProfilePicture image, Favourite favourite) {
         requireAllNonNull(name, phone, email, address, remark, birthday, tags);
         this.name = new SimpleObjectProperty<>(name);
         this.phone = new SimpleObjectProperty<>(phone);
@@ -42,13 +43,14 @@ public class Person implements ReadOnlyPerson, Comparable<Person> {
         // protect internal tags from changes in the arg list
         this.tags = new SimpleObjectProperty<>(new UniqueTagList(tags));
         this.image = new SimpleObjectProperty<>(image);
+        this.favourite = new SimpleObjectProperty<>(favourite);
     }
     /**
      * Creates a copy of the given ReadOnlyPerson.
      */
     public Person(ReadOnlyPerson source) {
         this(source.getName(), source.getPhone(), source.getEmail(), source.getAddress(), source.getRemark(),
-                source.getBirthday(), source.getTags(), source.getPicture());
+                source.getBirthday(), source.getTags(), source.getPicture(), source.getFavourite());
     }
 
     public void setName(Name name) {
@@ -145,6 +147,15 @@ public class Person implements ReadOnlyPerson, Comparable<Person> {
     @Override
     public int getMonth() {
         return birthday.get().getMonth();
+    }
+
+    @Override
+    public Favourite getFavourite() {
+        return favourite.get();
+    }
+
+    public void setFavourite(Favourite favourite) {
+        this.favourite.set(requireNonNull(favourite));
     }
 
     /**

@@ -108,6 +108,11 @@ public class AddCommandTest {
         }
 
         @Override
+        public void updateListToShowAll() {
+            fail("Thi method should not be called.");
+        }
+
+        @Override
         public ReadOnlyAddressBook getAddressBook() {
             fail("This method should not be called.");
             return null;

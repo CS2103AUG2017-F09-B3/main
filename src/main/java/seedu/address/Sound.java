@@ -8,8 +8,9 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import seedu.address.commons.core.LogsCenter;
 
+//@@author justintkj
 /**
- * The Playlist for the background music.
+ * Plays the errorSound.
  */
 public class Sound {
     private static final Logger logger = LogsCenter.getLogger("Error Sound");

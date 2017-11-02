@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import seedu.address.commons.core.LogsCenter;
 
+//@@author liliwei25
 /**
  * Creates folder to store all images saved by user
  */

@@ -11,6 +11,7 @@ import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Birthday;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Favourite;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -38,6 +39,8 @@ public class XmlAdaptedPerson {
     private String birthday;
     @XmlElement(required = true)
     private String image;
+    @XmlElement(required = true)
+    private String favourite;
     @XmlElement
     private List<XmlAdaptedTag> tagged = new ArrayList<>();
 
@@ -61,6 +64,7 @@ public class XmlAdaptedPerson {
         remark = source.getRemark().value;
         birthday = source.getBirthday().value;
         image = source.getPicture().getLocation();
+        favourite = source.getFavourite().toString();
         tagged = new ArrayList<>();
         for (Tag tag : source.getTags()) {
             tagged.add(new XmlAdaptedTag(tag));
@@ -84,7 +88,8 @@ public class XmlAdaptedPerson {
         final Remark remark = new Remark(this.remark);
         final Birthday birthday = new Birthday(this.birthday);
         final ProfilePicture picture = new ProfilePicture(this.image);
+        final Favourite favourite = new Favourite(this.favourite);
         final Set<Tag> tags = new HashSet<>(personTags);
-        return new Person(name, phone, email, address, remark, birthday, tags, picture);
+        return new Person(name, phone, email, address, remark, birthday, tags, picture, favourite);
     }
 }

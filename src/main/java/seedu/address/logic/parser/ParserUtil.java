@@ -13,6 +13,7 @@ import seedu.address.commons.util.StringUtil;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Birthday;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Favourite;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
 import seedu.address.model.person.Remark;
@@ -51,6 +52,19 @@ public class ParserUtil {
         }
         return Index.fromOneBased(Integer.parseInt(trimmedIndex));
     }
+    //@@author justintkj
+    /**
+     * Parses {@code number} into an {@code Integer} and returns it. Leading and trailing whitespaces will be
+     * trimmed.
+     * @throws IllegalValueException if the specified number is invalid (not non-zero unsigned integer).
+     */
+    public static int parseNumber(String number) throws IllegalValueException {
+        String trimmedNumber = number.trim();
+        if (!StringUtil.isNonZeroUnsignedInteger(trimmedNumber)) {
+            throw new IllegalValueException(MESSAGE_INVALID_INDEX);
+        }
+        return Integer.parseInt(trimmedNumber);
+    }
 
     /**
      * Parses {@code sortType}returns it. Leading and trailing whitespaces will be
@@ -65,6 +79,16 @@ public class ParserUtil {
             throw new IllegalValueException(MESSAGE_INVALID_SORT);
         }
         return toSort;
+    }
+    //@@author
+
+    /**
+     * Parses a {@code Optional<String> remark} into an {@code Optional<remark>} if {@code remark} is present.
+     * See header comment of this class regarding the use of {@code Optional} parameters.
+     */
+    public static Optional<Favourite> parseFavourite(Optional<String> favourite) throws IllegalValueException {
+        requireNonNull(favourite);
+        return favourite.isPresent() ? Optional.of(new Favourite(favourite.get())) : Optional.of(new Favourite(""));
     }
 
     /**

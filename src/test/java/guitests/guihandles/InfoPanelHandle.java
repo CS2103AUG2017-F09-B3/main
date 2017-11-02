@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 
+//@@author liliwei25
 /**
  * A handler for the {@code InfoPanel} of the UI.
  */

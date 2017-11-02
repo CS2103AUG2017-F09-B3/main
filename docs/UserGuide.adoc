@@ -1,4 +1,4 @@
-= AddressBook Level 4 - User Guide
+﻿= AddressBook Level 4 - User Guide
 PocketBook - User Guide
 :toc:
 :toc-title:
@@ -58,16 +58,29 @@ Format: `help`
 === Adding a person: `add`/'a'
 
 Adds a person to the address book +
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]...`
+Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]...` +
+Alternative Format : `add NAME, BLOCK STREET UNIT PHONENUMBER EMAIL`
 
 [TIP]
-A person can have any number of tags (including 0)
+A person can have any number of tags (including 0) +
+For alternative format, name needs to be the first field followed by ','. The rest do not need to be in any order. +
+Fields have to follow these formats: +
+Block : BLOCK (1 to 3 digits). Example : Block 1, Block 11, Block 111 +
+Unit : #(1 to 2 digits)-(1-3 digits)(Optional:Character). Example: #01-111B +
+Street : (1 Word) street (1 to 2 digits). Example : Jurong Street 11 +
+Number : (Optional:,)(8 digits)(Optional:,). Example: ,11111111, or 11111111. +
+Email : (1 alphanumericword)@(1 alphanumericword).(1 alphanumericword). Example: Jason@example.com +
+(Optional) Postal Code: singapore (6digits). Example :Singapore 655900 +
+(Optional) Birthday: (1 to 2 digit)-(1 to 2 digit)-(4digit). Birthday shouldnt be in the future and has to be a valid date.Example :Singapore 655900
+
 
 Examples:
 
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
 * `a n/Donald Pua t/friend e/donana@example.com a/Porsche street p/3153357 t/cleaner`
+* `add Jason, Block 111 street 55 #01-111 92008822 jason@example.com`
+* `add Dexter,street 15 Block 12 #01-111 singapore 666999 92008822 jason@example.com 92008822 11-11-2011`
 
 === Listing all persons : `list`
 
@@ -174,15 +187,65 @@ Selects the 1st person in the results of the `find` command.
 === Sort all persons : `sort`
 
 Sort all the persons according to their names in alphabetical order. +
-Format: `sort`
+Format: `sort ARG`
 ****
-* Sorts the storage list of all persons in alphabetical order
+* Sorts the storage list of all persons in ascending order
+* Valid Arguments are: 'name', 'number', 'address', 'email', 'remark', 'birthday'.
+* CamelCase arguments are allowed 'NamE', 'NuMbEr', 'AddResS, 'EmAIL', 'REMARK', 'BiRtHDAY'
 ****
 
 Examples:
 
-* `sort` +
-Sorts all the persons in alphabetical order.
+* `sort NaMe` +
+Sorts all the persons by name in alphabetical order.
+* `sort address` +
+Sorts all the persons by address in alphabetical order.
+* `sort number` +
+Sorts all the persons by number in alphabetical order.
+* `sort email` +
+Sorts all the persons by email in alphabetical order.
+* `sort remark` +
+Sorts all the persons by remark in alphabetical order.
+* `sort birthday` +
+Sorts all the persons by birthday in alphabetical order.
+
+=== Favourite : `favourite`
+
+Favourite a person selected by index by highlighting their name in a red box. +
+Format: `sort INDEX`
+****
+* Favourite a selected person by given index
+* The index refers to the index number shown in the most recent listing.
+* The index *must be a positive integer* `1, 2, 3, ...`
+****
+
+Examples:
+
+* `favourite 1` +
+Favourite the person with index 1 in list.
+* `favourite 2` +
+Favourite the person with index 2 in list.
+
+=== Emailing a person: `email`
+
+Email the specified person from the address book. +
+Format: `email INDEX, SUBJECT, BODY`
+
+****
+* Email the person at the specified `INDEX`.
+* The index(es) refers to the index numbers shown in the most recent listing.
+* The index(es) *must be a positive integers* 1, 2, 3, ...
+* Email will be sent using our team's Gmail account.
+* An internet connection is needed.
+* Subject and Body message should not contain any ','.
+****
+
+Examples:
+
+* `list` +
+`email 2, this is my subject message, this is my body message` +
+Emails the 2nd person in the address book list with "this is my subject" as subject and +
+"this is my body message" as the body message.
 
 === Removing a tag from all persons in addressbook : `removetag`
 
@@ -262,6 +325,22 @@ Removes the birthday of the 3rd person in the address book.
 When you first start the app, the app will check through all the birthdays of your contacts and notify you if there
 are any birthdays on that day.
 
+=== Adding/Editing Remark to person : `remark`
+
+Adds or edits selected person's remark +
+Format: `remark INDEX /rMessage`
+
+****
+* Adds/Edits the remark of person at the specified `INDEX`.
+* The index refers to the index numbers shown in the most recent listing.
+* The index *must be a positive integers* 1, 2, 3, ...
+****
+
+Examples:
+
+* `remark 2 /rsmartest guy in the class` +
+Adds/Edits the remark of the 2nd person in the address book.
+
 === Listing entered commands : `history`
 
 Lists all the commands that you have entered in reverse chronological order. +
@@ -273,14 +352,15 @@ Pressing the kbd:[&uarr;] and kbd:[&darr;] arrows will display the previous and 
 ====
 
 // tag::undoredo[]
-=== Undoing previous command : `undo` `u`
+=== Undoing previous command(s) : `undo` `u`
 
 Restores the address book to the state before the previous _undoable_ command was executed. +
 Format: `undo`
+	`undo NUMBER`
 	`u`
 [NOTE]
 ====
-Undoable commands: those commands that modify the address book's content (`add`, `delete`, `edit` and `clear`).
+Undoable commands: those commands that modify the address book's content (`add`, `delete`, `edit`, `clear`,`image`, `sort`, `favourite`, `birthday`, `remark`, `map`, `removeTag`).
 ====
 
 Examples:
@@ -288,6 +368,10 @@ Examples:
 * `delete 1` +
 `list` +
 `undo` (reverses the `delete 1` command) +
+
+* `delete 1` +
+`sort name` +
+`undo 2` (reverses the `delete 1` and `sort name`command) +
 
 * `select 1` +
 `list` +
@@ -303,9 +387,15 @@ The `undo` command fails as there are no undoable commands executed previously.
 
 Reverses the most recent `undo` command. +
 Format: `redo`
+	`redo NUMBER`
 	`r`
 
 Examples:
+
+* `delete 1` + `sort number`
+`undo` (reverses the `sort number` command) +
+`undo` (reverses the `delete 1` command) +
+`redo 2` (reapplies the `delete 1` and `sort number` command)
 
 * `delete 1` +
 `undo` (reverses the `delete 1` command) +
@@ -348,6 +438,15 @@ and press `Exit`.
 Address book data are saved in the hard disk automatically after any command that changes the data. +
 There is no need to save manually.
 
+=== Saving the AutoComplete Box
+
+Autocomplete data are saved in the hard disk automatically after any valid new command that user uses. +
+There is no need to save manually. A new empty Autcomplete.xml file will be created if deleted.
+
+=== Error Sound from invalid command
+
+Error beep sound will be played from ErrorSound.mp3 file every time an invalid command is entered by the user.
+
 == FAQ
 
 *Q*: How do I transfer my data to another Computer? +
@@ -357,11 +456,17 @@ There is no need to save manually.
 
 * *Add* `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]...` +
 e.g. `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+* *Add* `add NAME, BLOCK STREET UNIT PHONENUMBER EMAIL` +
+e.g. `add Jason, Block 11 Jurong Street 88 #01-11 22224444 jassie@example.com `
 * *Clear* : `clear`
 * *Delete* : `delete INDEX` +
 e.g. `delete 3`
 * *Edit* : `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]...` +
 e.g. `edit 2 n/James Lee e/jameslee@example.com`
+* *Email* : `email INDEX, Subject, Body`
+e.g. `email 2, this is my subject, this is my body message`
+* *Favourite* : `favourite (Optional:NUMBER)`
+e.g. `favourite 1`
 * *Find* : `find (KEYWORD [MORE_KEYWORDS] | t\KEYWORD)` +
 e.g. `find James Jake` +
 e.g. `find t/friends`
@@ -370,5 +475,11 @@ e.g. `find t/friends`
 * *Select* : `select INDEX` +
 e.g.`select 2`
 * *History* : `history`
-* *Undo* : `undo`
-* *Redo* : `redo`
+* *Undo* : `undo (Optional:NUMBER)`
+e.g. `Undo 2`
+* *Redo* : `redo (Optional:NUMBER)`
+e.g. `Redo 2`
+* *Remark* : `remark INDEX, r/MESSAGE`
+e.g. `Remark 2, r/remark`
+* *Sort* `sort name` + `sort number` + `sort address` + `sort email` + `sort remark` + `sort birthday`
+

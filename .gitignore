@@ -11,6 +11,8 @@ lib/*
 config.json
 src/test/data/sandbox/
 preferences.json
+Autocomplete.xml
+gradle.properties
 .DS_Store
 ./screenshot*.png
 classes/

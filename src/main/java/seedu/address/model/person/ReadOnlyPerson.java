@@ -33,6 +33,8 @@ public interface ReadOnlyPerson {
     ObjectProperty<ProfilePicture> imageProperty();
     void setImage(String image);
     ProfilePicture getPicture();
+    void setFavourite(Favourite favourite);
+    Favourite getFavourite();
 
     /**
      * Returns true if both have the same state. (interfaces cannot override .equals)
@@ -45,7 +47,8 @@ public interface ReadOnlyPerson {
                 && other.getEmail().equals(this.getEmail())
                 && other.getAddress().equals(this.getAddress())
                 && other.getRemark().equals(this.getRemark())
-                && other.getBirthday().equals(this.getBirthday()));
+                && other.getBirthday().equals(this.getBirthday()))
+                && other.getFavourite().equals(this.getFavourite());
     }
 
     /**
@@ -64,7 +67,9 @@ public interface ReadOnlyPerson {
                 .append(getRemark())
                 .append(" Birthday: ")
                 .append(getBirthday())
-                .append(" Tags: ");
+                .append(" Tags: ")
+                .append(" Favourite: ")
+                .append(getFavourite());
         getTags().forEach(builder::append);
         return builder.toString();
     }
