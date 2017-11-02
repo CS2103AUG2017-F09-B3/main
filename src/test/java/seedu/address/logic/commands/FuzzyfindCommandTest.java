@@ -77,7 +77,7 @@ public class FuzzyfindCommandTest {
 
     @Test
     //Test Fuzzy Find Functionality in Fuzzyfind
-    public void execute_multipleKeywords_multiplePersonsFound_fuzzy() {
+    public void execute_fuzzyFindv1() {
         String expectedMessage = String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 5);
         FuzzyfindCommand command = prepareCommand("e");
         assertCommandSuccess(command, expectedMessage, Arrays.asList(ALICE, BENSON, DANIEL, ELLE, GEORGE));
@@ -85,7 +85,7 @@ public class FuzzyfindCommandTest {
 
     @Test
     //Test Fuzzy Find Functionality in Fuzzyfind
-    public void execute_multipleKeywords_multiplePersonsFound_fuzzy_v2() {
+    public void execute_fuzzyFindv2() {
         String expectedMessage = String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 1);
         FuzzyfindCommand command = prepareCommand("eNsO");
         assertCommandSuccess(command, expectedMessage, Arrays.asList(BENSON));
