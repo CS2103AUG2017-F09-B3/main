@@ -5,6 +5,7 @@ import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,6 +38,11 @@ public class CommandBox extends UiPart<Region> {
     public static final String AUTOCOMPLETE_FILE_NAME = "Autocomplete.xml";
     public static final String ERROR_STYLE_CLASS = "error";
     private static final String FXML = "CommandBox.fxml";
+
+    public static final String STORAGE_FILE_NAME = "Autocomplete.xml";
+    public static final String ERROR_MESSAGE_CREATE_FILE_FAILED = "Unable to create file Autocomplete.xml";
+    public static final String EMPTY_STRING = "";
+
     private static String[] possibleSuggestion = {"add", "birthday", "clear", "list", "help", "removetag", "image",
         "edit", "find", "delete", "select", "favourite", "history", "undo", "redo", "email", "sort", "sort name", "map",
         "sort number", "sort email", "sort address", "sort remark", "sort birthday", "exit"};
@@ -55,20 +61,40 @@ public class CommandBox extends UiPart<Region> {
         // calls #setStyleToDefault() whenever there is a change to the text of the command box.
         commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
         historySnapshot = logic.getHistorySnapshot();
-        try {
-            XMLDecoder e = new XMLDecoder(new FileInputStream("Autocomplete.xml"));
-            mainPossibleSuggestion = ((ArrayList<String>) e.readObject());
-            e.close();
-        } catch (Exception ex) {
-            try {
-                File file = new File("Autocomplete.xml");
-                file.createNewFile();
-            } catch (IOException ioe) {
-                raise(new DataSavingExceptionEvent(ex));
-            }
-        }
+        updateAutocomplete();
         autocompletionbinding = TextFields.bindAutoCompletion(commandTextField, mainPossibleSuggestion);
     }
+
+    /**
+     * Updates autocomplete with Autocomplete.xml File 
+     */
+    private void updateAutocomplete() {
+        try {
+            updateAutocompleteWithStorageFile();
+        } catch (Exception ex) {
+            createNewStorageFile(ex);
+        }
+    }
+
+    /**
+     * Reads the storage file to update mainpossiblesuggestion
+     * @throws FileNotFoundException storage file cannot be found
+     */
+    private void updateAutocompleteWithStorageFile() throws FileNotFoundException {
+        XMLDecoder e = readStorageFile();
+        mainPossibleSuggestion = ((ArrayList<String>) e.readObject());
+        e.close();
+    }
+
+    /**
+     *  Reads the storage file
+     * @return  an input stream for reading archive
+     * @throws FileNotFoundException storagefile cannot be found
+     */
+    private XMLDecoder readStorageFile() throws FileNotFoundException {
+        return new XMLDecoder(new FileInputStream(STORAGE_FILE_NAME));
+    }
+
     //@@author
     /**
      * Handles the key press event, {@code keyEvent}.
@@ -100,22 +126,59 @@ public class CommandBox extends UiPart<Region> {
      * @throws CommandException if autocomplete.xml cannot be made.
      */
     public static void setAddSuggestion(String commandWord) throws CommandException {
-        if (!mainPossibleSuggestion.contains(commandWord)) {
-            try {
-                mainPossibleSuggestion.add(commandWord.trim());
-                XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(AUTOCOMPLETE_FILE_NAME)));
-                e.writeObject(mainPossibleSuggestion);
-                e.close();
-            } catch (Exception ex) {
-                try {
-                    File file = new File("Autocomplete.xml");
-                    file.createNewFile();
-                } catch (IOException ioe) {
-                    throw new CommandException("Unable to create file Autocomplete.xml");
-                }
-            }
+        if (mainPossibleSuggestion.contains(commandWord)) {
+            return;
+        }
+        try {
+            addNewDataInStorage(commandWord);
+        } catch (Exception ex) {
+            createNewStorageFile();
+        }
+
+    }
+
+    /**
+     * Creates a new storage file named Autocomplete.xml
+     * @param ex exception to be handled
+     */
+    private void createNewStorageFile(Exception ex)  {
+        try {
+            File file = new File(STORAGE_FILE_NAME);
+            file.createNewFile();
+            addNewDataInStorage(EMPTY_STRING);
+        } catch (IOException ioe) {
+            raise(new DataSavingExceptionEvent(ex));
         }
     }
+
+    /**
+     * Overloads the createNewStorageFile method
+     * @throws CommandException unable to create new file
+     */
+    private static void createNewStorageFile() throws CommandException {
+        try {
+            File file = new File(STORAGE_FILE_NAME);
+            file.createNewFile();
+            addNewDataInStorage(EMPTY_STRING);
+        } catch (IOException ioe) {
+            throw new CommandException(ERROR_MESSAGE_CREATE_FILE_FAILED);
+        }
+    }
+
+    /**
+     * Updates Storagefile with new content, used as refresh if no content
+     * @param commandWord input to be added to storage
+     * @throws FileNotFoundException file cannot be found
+     */
+    private static void addNewDataInStorage(String commandWord) throws FileNotFoundException {
+        if (!commandWord.equals(EMPTY_STRING)) {
+            mainPossibleSuggestion.add(commandWord.trim());
+        }
+        XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(AUTOCOMPLETE_FILE_NAME)));
+        e.writeObject(mainPossibleSuggestion);
+        e.close();
+    }
+
     //@@author
     /**
      * Updates the text field with the previous input in {@code historySnapshot},

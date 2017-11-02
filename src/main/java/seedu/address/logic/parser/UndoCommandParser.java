@@ -11,6 +11,11 @@ import seedu.address.logic.parser.exceptions.ParseException;
  * Parses input arguments and creates a new UndoCommand object
  */
 public class UndoCommandParser implements Parser<UndoCommand> {
+
+    public static final int FIRST_PART_MESSAGE = 0;
+    public static final String EMPTY_MESSAGE = "";
+    public static final int DEFAULT_CHOSEN_ONE = 1;
+
     /**
      * Parses the given {@code String} of arguments in the context of the UndoCommand
      * and returns an UndoCommand object for execution.
@@ -22,16 +27,28 @@ public class UndoCommandParser implements Parser<UndoCommand> {
 
         int numUndo;
         try {
-            if (splitArgs[0].trim().equals("")) {
-                numUndo = 1;
-            } else {
-                numUndo = ParserUtil.parseNumber(splitArgs[0]);
-            }
+            numUndo = getNumberOfUndoToBeDone(splitArgs[FIRST_PART_MESSAGE]);
         } catch (IllegalValueException ive) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, UndoCommand.MESSAGE_USAGE), ive);
         }
 
         return new UndoCommand(numUndo);
+    }
+
+    /**
+     * Generates number of undo to be done
+     * @param splitArg Message given by user
+     * @return Number of undo to be done
+     * @throws IllegalValueException invalid number of undo to be done
+     */
+    private int getNumberOfUndoToBeDone(String splitArg) throws IllegalValueException {
+        int numUndo;
+        if (splitArg.trim().equals(EMPTY_MESSAGE)) {
+            numUndo = DEFAULT_CHOSEN_ONE;
+        } else {
+            numUndo = ParserUtil.parseNumber(splitArg);
+        }
+        return numUndo;
     }
 
 }

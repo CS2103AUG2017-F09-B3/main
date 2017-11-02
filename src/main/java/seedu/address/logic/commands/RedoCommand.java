@@ -1,5 +1,6 @@
 package seedu.address.logic.commands;
 
+import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import seedu.address.commons.exceptions.IllegalValueException;
@@ -25,39 +26,71 @@ public class RedoCommand extends Command {
             + "Parameters: (POSITIVE INDEX)\n"
             + "Example: " + COMMAND_WORD + ""
             + "Example: " + COMMAND_WORD + " 1";
+    public static final String TOO_MANY_REDO_FORMAT = "Maximum redo size: ";
+    public static final String EMPTY_STACK_ERROR_MESSAGE = "No more commands to redo!";
+    public static final int INDEX_ZERO = 0;
+    public static final String INDEX_ONE = "1";
 
     private int numRedo;
     //@@author justintkj
     public RedoCommand(int numRedo) {
+        requireNonNull(numRedo);
         this.numRedo = numRedo;
     }
-    public RedoCommand() {
-        try {
-            numRedo = ParserUtil.parseNumber("1");
-        } catch (IllegalValueException ex) {
-            System.out.println("Shouldn't reach here");
-        }
+    public RedoCommand() throws IllegalValueException {
+        this.numRedo = ParserUtil.parseNumber(INDEX_ONE);
     }
     @Override
     public CommandResult execute() throws CommandException {
         requireAllNonNull(model, undoRedoStack);
 
-        if (undoRedoStack.getRedoStackSize() == 0) {
-            throw new CommandException("No more commands to redo!");
-        }
-        if (numRedo > undoRedoStack.getRedoStackSize()) {
-            throw new CommandException("Maximum redo size: " + undoRedoStack.getRedoStackSize());
-        }
+        checksStackNotEmpty();
+        checksRedoSizeNotBiggerThanStack();
 
-        for (int i = 0; i < numRedo; i++) {
+        redoMultipleTimes();
+
+        return new CommandResult(MESSAGE_SUCCESS);
+    }
+
+    /**
+     * Redo for numRedo number of times
+     * @throws CommandException if redo while stack is empty
+     */
+    private void redoMultipleTimes() throws CommandException {
+        for (int i = INDEX_ZERO; i < numRedo; i++) {
             if (!undoRedoStack.canRedo()) {
                 throw new CommandException(MESSAGE_FAILURE);
             }
 
             undoRedoStack.popRedo().redo();
         }
+    }
 
-        return new CommandResult(MESSAGE_SUCCESS);
+    /**
+     * Checks if number of redos is not bigger than current avaliable number of redos
+     * @throws CommandException if redo while stack is empty
+     */
+    private void checksRedoSizeNotBiggerThanStack() throws CommandException {
+        if (numRedo > undoRedoStack.getRedoStackSize()) {
+            throw new CommandException(TOO_MANY_REDO_FORMAT + undoRedoStack.getRedoStackSize());
+        }
+    }
+
+    /**
+     * Checks if current number of redo avaliable is zero
+     * @throws CommandException if current stack size is zero
+     */
+    private void checksStackNotEmpty() throws CommandException {
+        if (undoRedoStack.getRedoStackSize() == 0) {
+            throw new CommandException(EMPTY_STACK_ERROR_MESSAGE);
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof RedoCommand // instanceof handles nulls
+                && this.numRedo == (((RedoCommand) other).numRedo)); // state check
     }
 
     @Override

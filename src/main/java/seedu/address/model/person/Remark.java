@@ -14,6 +14,7 @@ public class Remark {
 
     public Remark(String remark) {
         requireNonNull(remark);
+        assert remark != null;
         this.value = remark;
     }
 

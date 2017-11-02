@@ -62,11 +62,7 @@ public class AddressBookParser {
 
         case EmailCommand.COMMAND_WORD:
             Command emailCommand = new EmailCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return emailCommand;
 
         case SortCommand.COMMAND_WORD:
@@ -75,50 +71,30 @@ public class AddressBookParser {
         case AddCommand.COMMAND_WORD:
         case AddCommand.COMMAND_ALIAS:
             Command addCommand = new AddCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return addCommand;
 
         case EditCommand.COMMAND_WORD:
         case EditCommand.COMMAND_ALIAS:
             Command editCommand = new EditCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return editCommand;
 
         case SelectCommand.COMMAND_WORD:
         case SelectCommand.COMMAND_ALIAS:
             Command selectCommand = new SelectCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return selectCommand;
 
         case DeleteCommand.COMMAND_WORD:
         case DeleteCommand.COMMAND_ALIAS:
             Command deleteCommand = new DeleteCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return deleteCommand;
 
         case RemoveTagCommand.COMMAND_WORD:
             Command removeTagCommand = new RemoveTagCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return removeTagCommand;
 
         case ClearCommand.COMMAND_WORD:
@@ -128,16 +104,14 @@ public class AddressBookParser {
         case FindCommand.COMMAND_WORD:
         case FindCommand.COMMAND_ALIAS:
             Command findCommand = new FindCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return findCommand;
 
         case FuzzyfindCommand.COMMAND_WORD:
         case FuzzyfindCommand.COMMAND_ALIAS:
-            return new FuzzyfindCommandParser().parse(arguments);
+            Command fuzzyfindCommand = new FuzzyfindCommandParser().parse(arguments);
+            addValidInputToAutocomplete(userInput);
+            return fuzzyfindCommand;
 
         case ListCommand.COMMAND_WORD:
         case ListCommand.COMMAND_ALIAS:
@@ -156,64 +130,54 @@ public class AddressBookParser {
         case UndoCommand.COMMAND_WORD:
         case UndoCommand.COMMAND_ALIAS:
             Command undoCommand = new UndoCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return undoCommand;
 
         case RedoCommand.COMMAND_WORD:
         case RedoCommand.COMMAND_ALIAS:
             Command redoCommand = new RedoCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return redoCommand;
 
         case RemarkCommand.COMMAND_WORD:
             Command remarkCommand = new RemarkCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return remarkCommand;
 
         case BirthdayCommand.COMMAND_WORD:
             Command birthdayCommand = new BirthdayCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return birthdayCommand;
 
         case MapCommand.COMMAND_WORD:
             Command mapCommand = new MapCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return mapCommand;
 
         case ImageCommand.COMMAND_WORD:
-            return new ImageCommandParser().parse(arguments);
-
+            Command imageCommand = new ImageCommandParser().parse(arguments);
+            addValidInputToAutocomplete(userInput);
+            return imageCommand;
         case FavouriteCommand.COMMAND_WORD:
             Command favouriteCommand = new FavouriteCommandParser().parse(arguments);
-            try {
-                CommandBox.setAddSuggestion(userInput);
-            } catch (Exception ex) {
-                throw new ParseException(MISSING_AUTOCOMPLETEFILE);
-            }
+            addValidInputToAutocomplete(userInput);
             return favouriteCommand;
 
         default:
             throw new ParseException(MESSAGE_UNKNOWN_COMMAND);
+        }
+    }
+
+    /**
+     * Updates Storage for autocomplete with the valid command
+     * @param userInput User's command
+     * @throws ParseException storagefile is missing
+     */
+    private void addValidInputToAutocomplete(String userInput) throws ParseException {
+        try {
+            CommandBox.setAddSuggestion(userInput);
+        } catch (Exception ex) {
+            throw new ParseException(MISSING_AUTOCOMPLETEFILE);
         }
     }
 

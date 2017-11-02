@@ -6,7 +6,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 
 import java.util.List;
 
-import seedu.address.commons.core.Messages;
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.person.Person;
@@ -58,14 +57,10 @@ public class RemarkCommand extends UndoableCommand {
     public CommandResult executeUndoableCommand() throws CommandException {
         List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
 
-        if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-        }
+        CommandUtil.checksIndexSmallerThanList(lastShownList, index);
 
         ReadOnlyPerson personToEdit = lastShownList.get(index.getZeroBased());
-        Person editedPerson = new Person(personToEdit.getName(), personToEdit.getPhone(), personToEdit.getEmail(),
-                personToEdit.getAddress(), remark, personToEdit.getBirthday(), personToEdit.getTags(),
-                personToEdit.getPicture(), personToEdit.getFavourite());
+        Person editedPerson = generateNewEditedPerson(personToEdit);
 
         try {
             model.updatePerson(personToEdit, editedPerson);
@@ -78,6 +73,18 @@ public class RemarkCommand extends UndoableCommand {
         model.updateListToShowAll();
         return new CommandResult(MESSAGE_REMARK_SUCCESS + personToEdit.getName().toString());
     }
+
+    /**
+     * Change the remark field of the selected person to edit
+     * @param personToEdit Selected person to edit
+     * @return A new person with remark field edited
+     */
+    private Person generateNewEditedPerson(ReadOnlyPerson personToEdit) {
+        return new Person(personToEdit.getName(), personToEdit.getPhone(), personToEdit.getEmail(),
+                    personToEdit.getAddress(), remark, personToEdit.getBirthday(), personToEdit.getTags(),
+                    personToEdit.getPicture(), personToEdit.getFavourite());
+    }
+
 
     @Override
      public boolean equals(Object other) {

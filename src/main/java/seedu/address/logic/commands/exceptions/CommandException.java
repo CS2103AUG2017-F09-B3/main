@@ -8,6 +8,6 @@ import seedu.address.Sound;
 public class CommandException extends Exception {
     public CommandException(String message) {
         super(message);
-        Sound.music();
+        Sound.invalidCommandSound();
     }
 }
