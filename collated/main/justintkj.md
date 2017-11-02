@@ -1,136 +1,340 @@
 # justintkj
-###### /java/seedu/address/ui/CommandBox.java
+###### /java/seedu/address/logic/commands/EmailCommand.java
 ``` java
 /**
- * The UI component that is responsible for receiving user command inputs.
+ * Email a person chosen by index
  */
-public class CommandBox extends UiPart<Region> {
+public class EmailCommand extends Command {
 
-    public static final String AUTOCOMPLETE_FILE_NAME = "Autocomplete.xml";
-    public static final String ERROR_STYLE_CLASS = "error";
-    private static final String FXML = "CommandBox.fxml";
-    private static String[] possibleSuggestion = {"add", "birthday", "clear", "list", "help", "removetag", "image",
-        "edit", "find", "delete", "select", "favourite", "history", "undo", "redo", "email", "sort", "sort name", "map",
-        "sort number", "sort email", "sort address", "sort remark", "sort birthday", "exit"};
-    private static ArrayList<String> mainPossibleSuggestion = new ArrayList<String>(Arrays.asList(possibleSuggestion));
-    private final Logger logger = LogsCenter.getLogger(CommandBox.class);
-    private final Logic logic;
-    private ListElementPointer historySnapshot;
+    public static final String COMMAND_WORD = "email";
+    public static final String COMMAND_ALIAS = "e";
 
-    @FXML
-    private TextField commandTextField;
-    private ArrayList<String> prevText = new ArrayList<String>();
-    private AutoCompletionBinding autocompletionbinding;
-    public CommandBox(Logic logic) {
-        super(FXML);
-        this.logic = logic;
-        // calls #setStyleToDefault() whenever there is a change to the text of the command box.
-        commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
-        historySnapshot = logic.getHistorySnapshot();
+    public static final String MESSAGE_SUCCESS = "Email sent to :";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Email the person identified "
+            + "by the index number used in the last person listing. "
+            + "An email will be sent to the chosen person.\n"
+            + "Parameters: INDEX (must be a positive integer),SUBJECT,MESSAGE "
+            + "[Email Index,Subject,Message]\n"
+            + "Example: " + COMMAND_WORD + " 1"
+            + ",subjectmessage,textmessage";
+    public final Index index;
+    public final String subject;
+    public final String message;
+
+    public EmailCommand(Index index, String subject, String message) {
+        this.index = index;
+        this.subject = subject;
+        this.message = message;
+    }
+
+    @Override
+    public CommandResult execute() throws CommandException {
+        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        }
+
+        ReadOnlyPerson personToEmail = lastShownList.get(index.getZeroBased());
+
         try {
-            XMLDecoder e = new XMLDecoder(new FileInputStream("Autocomplete.xml"));
-            mainPossibleSuggestion = ((ArrayList<String>) e.readObject());
-            e.close();
-        } catch (Exception ex) {
-            try {
-                File file = new File("Autocomplete.xml");
-                file.createNewFile();
-            } catch (IOException ioe) {
-                raise(new DataSavingExceptionEvent(ex));
+            String host = "smtp.gmail.com";
+            String user = "cs2103f09b3@gmail.com";
+            String pass = "pocketbook";
+            String to = personToEmail.getEmail().toString();
+            String from = "cs2103f09b3@gmail.com";
+            String subject = this.subject;
+            String newLine = "";
+            for (int i = 0; i < 5; i++) {
+                newLine += System.getProperty("line.separator");
             }
-        }
-        autocompletionbinding = TextFields.bindAutoCompletion(commandTextField, mainPossibleSuggestion);
-    }
-```
-###### /java/seedu/address/ui/CommandBox.java
-``` java
+            String messageText = this.message + newLine + "This is a generated mail provided by CS2103F09B3 Team.";
+            boolean sessionDebug = false;
 
-    /**
-     * Adds in a valid command string into autocomplete.xml storage
-     * @param commandWord
-     * @throws CommandException if autocomplete.xml cannot be made.
-     */
-    public static void setAddSuggestion(String commandWord) throws CommandException {
-        if (!mainPossibleSuggestion.contains(commandWord)) {
-            try {
-                mainPossibleSuggestion.add(commandWord.trim());
-                XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(AUTOCOMPLETE_FILE_NAME)));
-                e.writeObject(mainPossibleSuggestion);
-                e.close();
-            } catch (Exception ex) {
-                try {
-                    File file = new File("Autocomplete.xml");
-                    file.createNewFile();
-                } catch (IOException ioe) {
-                    throw new CommandException("Unable to create file Autocomplete.xml");
-                }
-            }
-        }
-    }
-```
-###### /java/seedu/address/ui/PersonCard.java
-``` java
-    /**
-     * Binds the individual UI elements to observe their respective {@code Person} properties
-     * so that they will be notified of any changes.
-     * Changes the color code of the person if favourite.
-     */
-    private void bindListeners(ReadOnlyPerson person) {
-        name.textProperty().bind(Bindings.convert(person.nameProperty()));
-        if (person.getFavourite().toString().equals("true")) {
-            name.setStyle("-fx-background-color : #ff0000");
-        } else if (person.getFavourite().toString().equals("false")) {
-            name.setStyle("-fx-background-color : transparent");
-        }
-    }
-```
-###### /java/seedu/address/Sound.java
-``` java
-/**
- * Plays the errorSound.
- */
-public class Sound {
-    private static final Logger logger = LogsCenter.getLogger("Error Sound");
-    private static ArrayList<String> musicList = new ArrayList<String>(Arrays.asList("ErrorSound.mp3"));
-    private static int curr = 0;
-    private static String bip;
-    private static Media hit;
-    private static MediaPlayer mediaPlayer;
+            Properties props = System.getProperties();
 
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", host);
+            props.put("mail.smtp.port", "587");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.required", "true");
 
-    /**
-     * start playing the first error music on the playlist.
-     */
+            java.security.Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+            Session mailSession = Session.getDefaultInstance(props, null);
+            mailSession.setDebug(sessionDebug);
+            Message msg = new MimeMessage(mailSession);
+            msg.setFrom(new InternetAddress(from));
+            InternetAddress[] address = {new InternetAddress(to)};
+            msg.setRecipients(Message.RecipientType.TO, address);
+            msg.setSubject(subject);
+            msg.setSentDate(new Date());
+            msg.setText(messageText);
 
-    public static void music() {
-        try {
-            bip = musicList.get(curr);
-            hit = new Media(Thread.currentThread().getContextClassLoader().getResource(bip).toURI().toString());
-            mediaPlayer = new MediaPlayer(hit);
-            mediaPlayer.play();
+            Transport transport = mailSession.getTransport("smtp");
+            transport.connect(host, user, pass);
+            transport.sendMessage(msg, msg.getAllRecipients());
+            transport.close();
+
         } catch (Exception ex) {
-            logger.info("Error with playing sound.");
-            ex.printStackTrace();
+            throw new CommandException("Incorrect Email format");
         }
+        return new CommandResult("Email successfully sent to : " + personToEmail.getName());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
+        }
+        // instanceof handles nulls
+        if (!(other instanceof BirthdayCommand)) {
+            return false;
+        }
+
+        // state check
+        EmailCommand e = (EmailCommand) other;
+        return index.equals(e.index) && subject.equals(e.subject) && message.equals(e.message);
     }
 }
 ```
-###### /java/seedu/address/logic/UndoRedoStack.java
+###### /java/seedu/address/logic/commands/FavouriteCommand.java
 ``` java
-    /**
-     * Gets number of undoable tasks in integer
-     */
-    public int getUndoStackSize() {
-        return undoStack.size();
+/**
+ * Favourites a person identified using it's last displayed index from the address book.
+ */
+public class FavouriteCommand extends UndoableCommand {
+
+    public static final String COMMAND_WORD = "favourite";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Favourites/Highlights the person identified by the index number used in the last person listing.\n"
+            + "Parameters: INDEX (must be a positive integer)\n"
+            + "Example: " + COMMAND_WORD + " 1";
+
+    public static final String MESSAGE_FAVOURITE_SUCCESS = "Favourite Person: %1$s";
+
+    private final Index targetIndex;
+    private final Favourite favourite;
+
+    public FavouriteCommand(Index targetIndex, Favourite favourite) {
+        requireNonNull(targetIndex);
+        this.targetIndex = targetIndex;
+        this.favourite = favourite;
     }
 
-    /**
-     * Gets number of redoable tasks in integer
-     */
-    public int getRedoStackSize() {
-        return redoStack.size();
+    @Override
+    public CommandResult executeUndoableCommand() throws CommandException {
+
+        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
+
+        if (targetIndex.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        }
+
+        ReadOnlyPerson personToEdit = lastShownList.get(targetIndex.getZeroBased());
+        ReadOnlyPerson editedPerson = personToEdit;
+        if (editedPerson.getFavourite().toString().equals("true")) {
+            favourite.inverse();
+        }
+        editedPerson.setFavourite(favourite);
+
+        try {
+            model.updatePerson(personToEdit, editedPerson);
+        } catch (DuplicatePersonException dpe) {
+            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
+        } catch (PersonNotFoundException pnfe) {
+            throw new AssertionError("The target person cannot be missing");
+        }
+        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        return new CommandResult(String.format(MESSAGE_FAVOURITE_SUCCESS, editedPerson));
+
     }
 
+    @Override
+    public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
+        }
+        // instanceof handles nulls
+        if (!(other instanceof FavouriteCommand)) {
+            return false;
+        }
+
+        // state check
+        FavouriteCommand e = (FavouriteCommand) other;
+        return targetIndex.equals(e.targetIndex) && favourite.equals(e.favourite);
+    }
+}
+```
+###### /java/seedu/address/logic/commands/RedoCommand.java
+``` java
+    public RedoCommand(Index numRedo) {
+        this.numRedo = numRedo;
+    }
+    public RedoCommand() {
+        try {
+            numRedo = ParserUtil.parseIndex("1");
+        } catch (IllegalValueException ex) {
+            System.out.println("Shouldn't reach here");
+        }
+    }
+    @Override
+    public CommandResult execute() throws CommandException {
+        requireAllNonNull(model, undoRedoStack);
+
+        if (undoRedoStack.getRedoStackSize() == 0) {
+            throw new CommandException("No more commands to redo!");
+        }
+        if (numRedo.getOneBased() > undoRedoStack.getRedoStackSize()) {
+            throw new CommandException("Maximum redo size: " + undoRedoStack.getRedoStackSize());
+        }
+
+        for (int i = 0; i < numRedo.getOneBased(); i++) {
+            if (!undoRedoStack.canRedo()) {
+                throw new CommandException(MESSAGE_FAILURE);
+            }
+
+            undoRedoStack.popRedo().redo();
+        }
+
+        return new CommandResult(MESSAGE_SUCCESS);
+    }
+```
+###### /java/seedu/address/logic/commands/RemarkCommand.java
+``` java
+/**
+ * Edits the remark of the person identified by index number in person listing.
+ */
+
+public class RemarkCommand extends UndoableCommand {
+
+    public static final String COMMAND_WORD = "remark";
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the remark of the person identified "
+            + "by the index number used in the last person listing. "
+            + "Existing remark will be overwritten by the input.\n"
+            + "Parameters: INDEX (must be a positive integer) "
+            + PREFIX_REMARK + "[REMARK]\n"
+            + "Example: " + COMMAND_WORD + " 1 "
+            + PREFIX_REMARK + "Likes to swim.";
+
+    private final Index index;
+    private final Remark remark;
+
+    public RemarkCommand (Index index, Remark remark) {
+        requireNonNull(index);
+        requireNonNull(remark);
+
+        this.index = index;
+        this.remark = remark;
+    }
+
+    public RemarkCommand (Index index, String remark) {
+        requireNonNull(index);
+        requireNonNull(remark);
+
+        this.index = index;
+        this.remark = new Remark(remark);
+    }
+
+    public CommandResult executeUndoableCommand() throws CommandException {
+        throw new CommandException(index + " " + remark);
+    }
+
+    @Override
+     public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
+        }
+        // instanceof handles nulls
+        if (!(other instanceof RemarkCommand)) {
+            return false;
+        }
+
+        // state check
+        RemarkCommand e = (RemarkCommand) other;
+        return index.equals(e.index) && remark.equals(e.remark);
+    }
+}
+```
+###### /java/seedu/address/logic/commands/SortCommand.java
+``` java
+/**
+ * Sorts a the list of persons in ascending alphabetical order
+ */
+public class SortCommand extends UndoableCommand {
+    public static final String COMMAND_WORD = "sort";
+    public static final String MESSAGE_SORT_SUCCESS = "Sorted in ascending order: ";
+    public static final String MESSAGE_SORT_FAILURE = "Invalid command format!";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Sorts the person identified by the index number used in the last person listing.\n"
+            + "Parameters: name/num/address/email (the type of sort to be executed)\n"
+            + "Example: " + COMMAND_WORD + " name"
+            + "Example: " + COMMAND_WORD + " number"
+            + "Example: " + COMMAND_WORD + " address"
+            + "Example: " + COMMAND_WORD + " remark"
+            + "Example: " + COMMAND_WORD + " email"
+            + "Example: " + COMMAND_WORD + " birthday";
+
+
+    private String sortType;
+
+    public SortCommand(String sortType) {
+        this.sortType = sortType.toLowerCase();
+    }
+
+    @Override
+    public CommandResult executeUndoableCommand() throws CommandException {
+        model.sortPerson(sortType);
+        return new CommandResult(MESSAGE_SORT_SUCCESS + sortType);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof SortCommand // instanceof handles nulls
+                && this.sortType.equals(((SortCommand) other).sortType)); // state check
+    }
+}
+```
+###### /java/seedu/address/logic/commands/UndoCommand.java
+``` java
+    public UndoCommand(Index numUndo) {
+        this.numUndo = numUndo;
+    }
+    public UndoCommand() {
+        try {
+            numUndo = ParserUtil.parseIndex("1");
+        } catch (IllegalValueException ex) {
+            System.out.println("Shouldn't reach here");
+        }
+
+    }
+
+    @Override
+    public CommandResult execute() throws CommandException {
+        requireAllNonNull(model, undoRedoStack);
+
+        if (undoRedoStack.getUndoStackSize() == 0) {
+            throw new CommandException("No more commands to undo!");
+        }
+        if (numUndo.getOneBased() > undoRedoStack.getUndoStackSize()) {
+            throw new CommandException("Maximum undo size: " + undoRedoStack.getUndoStackSize());
+        }
+
+        for (int i = 0; i < numUndo.getOneBased(); i++) {
+            if (!undoRedoStack.canUndo()) {
+                throw new CommandException(MESSAGE_FAILURE);
+            }
+
+            undoRedoStack.popUndo().undo();
+        }
+        return new CommandResult(MESSAGE_SUCCESS);
+    }
 ```
 ###### /java/seedu/address/logic/parser/AddCommandParser.java
 ``` java
@@ -266,67 +470,6 @@ public class AddCommandParser implements Parser<AddCommand> {
             throw new ParseException(ive.getMessage(), ive);
         }
     }
-```
-###### /java/seedu/address/logic/parser/RedoCommandParser.java
-``` java
-/**
-* Parses input arguments and creates a new RedoCommand object
-*/
-public class RedoCommandParser implements Parser<RedoCommand> {
-
-    public static final String NUMBER_ONE = "1";
-
-    /**
-     * Parses the given {@code String} of arguments in the context of the UndoCommand
-     * and returns an RedoCommand object for execution.
-     * @throws ParseException if the user input does not conform the expected format
-     */
-    public RedoCommand parse(String args) throws ParseException {
-        String[] splitArgs = args.trim().split(" ");
-
-        int numRedo;
-        try {
-            if (splitArgs[0].trim().equals("")) {
-                numRedo = ParserUtil.parseNumber(NUMBER_ONE);
-            } else {
-                numRedo = ParserUtil.parseNumber(splitArgs[0]);
-            }
-        } catch (IllegalValueException ive) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RedoCommand.MESSAGE_USAGE), ive);
-        }
-
-        return new RedoCommand(numRedo);
-    }
-
-}
-```
-###### /java/seedu/address/logic/parser/RemarkCommandParser.java
-``` java
-/**
- * Parses input arguments and creates a new AddCommand object
- */
-public class RemarkCommandParser implements Parser<RemarkCommand> {
-    /**
-     * Parses the given {@code String} of arguments in the context of the RemarkCommand
-     * and returns a RemarkCommand object for execution.
-     *
-     * @throws ParseException if the user input does not conform the expected format
-     */
-    public RemarkCommand parse(String args) throws ParseException {
-        requireNonNull(args);
-        ArgumentMultimap argMultimap =
-                ArgumentTokenizer.tokenize(args, PREFIX_REMARK);
-
-        Index index;
-        try {
-            index = ParserUtil.parseIndex(argMultimap.getPreamble());
-        } catch (IllegalValueException ive) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE));
-        }
-        Remark remark = new Remark(argMultimap.getValue(PREFIX_REMARK).orElse(""));
-        return new RemarkCommand(index, remark);
-    }
-}
 ```
 ###### /java/seedu/address/logic/parser/AddressBookParser.java
 ``` java
@@ -506,36 +649,6 @@ public class RemarkCommandParser implements Parser<RemarkCommand> {
 
 }
 ```
-###### /java/seedu/address/logic/parser/ParserUtil.java
-``` java
-    /**
-     * Parses {@code number} into an {@code Integer} and returns it. Leading and trailing whitespaces will be
-     * trimmed.
-     * @throws IllegalValueException if the specified number is invalid (not non-zero unsigned integer).
-     */
-    public static int parseNumber(String number) throws IllegalValueException {
-        String trimmedNumber = number.trim();
-        if (!StringUtil.isNonZeroUnsignedInteger(trimmedNumber)) {
-            throw new IllegalValueException(MESSAGE_INVALID_INDEX);
-        }
-        return Integer.parseInt(trimmedNumber);
-    }
-
-    /**
-     * Parses {@code sortType}returns it. Leading and trailing whitespaces will be
-     * trimmed.
-     * @throws IllegalValueException if the specified index is invalid (not valid sorting type).
-     */
-    public static String parseSortType(String sortType) throws IllegalValueException {
-        String toSort = sortType.trim().toLowerCase();
-        if (!toSort.equals(SORTNAME_ARG) && !toSort.equals(SORTNUM_ARG)
-            && !toSort.equals(SORTADD_ARG) && !toSort.equals(SORTEMAIL_ARG)
-            && !toSort.equals(SORTREMARK_ARG) && !toSort.equals(SORTBIRTHDAY_ARG)) {
-            throw new IllegalValueException(MESSAGE_INVALID_SORT);
-        }
-        return toSort;
-    }
-```
 ###### /java/seedu/address/logic/parser/EmailCommandParser.java
 ``` java
 /**
@@ -556,9 +669,10 @@ public class EmailCommandParser implements Parser<EmailCommand> {
         String message;
         try {
             String[] messages = args.trim().split(",");
-            if (messages.length != 3) {
+            if (messages.length < 3) {
                 throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EmailCommand.MESSAGE_USAGE));
             }
+
             String[] splitArgs = messages[0].trim().split(" ");
             index = ParserUtil.parseIndex(splitArgs[0]);
             subject = (messages[1]);
@@ -596,6 +710,64 @@ public class FavouriteCommandParser implements Parser<FavouriteCommand> {
         }
 
         return new FavouriteCommand(index, favourite);
+    }
+}
+```
+###### /java/seedu/address/logic/parser/RedoCommandParser.java
+``` java
+/**
+* Parses input arguments and creates a new RedoCommand object
+*/
+public class RedoCommandParser implements Parser<RedoCommand> {
+    /**
+     * Parses the given {@code String} of arguments in the context of the UndoCommand
+     * and returns an RedoCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public RedoCommand parse(String args) throws ParseException {
+        String[] splitArgs = args.trim().split(" ");
+
+        Index index;
+        try {
+            if (splitArgs[0].trim().equals("")) {
+                index = ParserUtil.parseIndex("1");
+            } else {
+                index = ParserUtil.parseIndex(splitArgs[0]);
+            }
+        } catch (IllegalValueException ive) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RedoCommand.MESSAGE_USAGE), ive);
+        }
+
+        return new RedoCommand(index);
+    }
+
+}
+```
+###### /java/seedu/address/logic/parser/RemarkCommandParser.java
+``` java
+/**
+ * Parses input arguments and creates a new AddCommand object
+ */
+public class RemarkCommandParser implements Parser<RemarkCommand> {
+    /**
+     * Parses the given {@code String} of arguments in the context of the RemarkCommand
+     * and returns a RemarkCommand object for execution.
+     *
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public RemarkCommand parse(String args) throws ParseException {
+        requireNonNull(args);
+        ArgumentMultimap argMultimap =
+                ArgumentTokenizer.tokenize(args, PREFIX_REMARK);
+
+        Index index;
+        try {
+            index = ParserUtil.parseIndex(argMultimap.getPreamble());
+        } catch (IllegalValueException ive) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE));
+        }
+        Remark remark = new Remark(argMultimap.getValue(PREFIX_REMARK).orElse(""));
+        return new RemarkCommand(index, remark);
     }
 }
 ```
@@ -638,397 +810,53 @@ public class UndoCommandParser implements Parser<UndoCommand> {
 
         String[] splitArgs = args.trim().split(" ");
 
-        int numUndo;
+        Index index;
         try {
             if (splitArgs[0].trim().equals("")) {
-                numUndo = 1;
+                index = ParserUtil.parseIndex("1");
             } else {
-                numUndo = ParserUtil.parseNumber(splitArgs[0]);
+                index = ParserUtil.parseIndex(splitArgs[0]);
             }
         } catch (IllegalValueException ive) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, UndoCommand.MESSAGE_USAGE), ive);
         }
 
-        return new UndoCommand(numUndo);
+        return new UndoCommand(index);
     }
 
 }
 ```
-###### /java/seedu/address/logic/commands/EmailCommand.java
+###### /java/seedu/address/logic/UndoRedoStack.java
 ``` java
-/**
- * Email a person chosen by index
- */
-public class EmailCommand extends Command {
-
-    public static final String COMMAND_WORD = "email";
-    public static final String COMMAND_ALIAS = "e";
-
-    public static final String MESSAGE_SUCCESS = "Email sent to :";
-
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Email the person identified "
-            + "by the index number used in the last person listing. "
-            + "An email will be sent to the chosen person.\n"
-            + "Parameters: INDEX (must be a positive integer),SUBJECT,MESSAGE "
-            + "[Email Index,Subject,Message]\n"
-            + "Example: " + COMMAND_WORD + " 1"
-            + ",subjectmessage,textmessage";
-    public final Index index;
-    public final String subject;
-    public final String message;
-
-    public EmailCommand(Index index, String subject, String message) {
-        this.index = index;
-        this.subject = subject;
-        this.message = message;
+    /**
+     * Gets number of undoable tasks in integer
+     */
+    public int getUndoStackSize() {
+        return undoStack.size();
     }
 
-    @Override
-    public CommandResult execute() throws CommandException {
-        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
-
-        if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-        }
-
-        ReadOnlyPerson personToEmail = lastShownList.get(index.getZeroBased());
-
-        try {
-            String host = "smtp.gmail.com";
-            String user = "cs2103f09b3@gmail.com";
-            String pass = "pocketbook";
-            String to = personToEmail.getEmail().toString();
-            String from = "cs2103f09b3@gmail.com";
-            String subject = this.subject;
-            String newLine = "";
-            for (int i = 0; i < 5; i++) {
-                newLine += System.getProperty("line.separator");
-            }
-            String messageText = this.message + newLine + "This is a generated mail provided by CS2103F09B3 Team.";
-            boolean sessionDebug = false;
-
-            Properties props = System.getProperties();
-
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", host);
-            props.put("mail.smtp.port", "587");
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.required", "true");
-
-            java.security.Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
-            Session mailSession = Session.getDefaultInstance(props, null);
-            mailSession.setDebug(sessionDebug);
-            Message msg = new MimeMessage(mailSession);
-            msg.setFrom(new InternetAddress(from));
-            InternetAddress[] address = {new InternetAddress(to)};
-            msg.setRecipients(Message.RecipientType.TO, address);
-            msg.setSubject(subject);
-            msg.setSentDate(new Date());
-            msg.setText(messageText);
-
-            Transport transport = mailSession.getTransport("smtp");
-            transport.connect(host, user, pass);
-            transport.sendMessage(msg, msg.getAllRecipients());
-            transport.close();
-
-        } catch (Exception ex) {
-            throw new CommandException("Incorrect Email format");
-        }
-        return new CommandResult("Email successfully sent to : " + personToEmail.getName());
+    /**
+     * Gets number of redoable tasks in integer
+     */
+    public int getRedoStackSize() {
+        return redoStack.size();
     }
 
-    @Override
-    public boolean equals(Object other) {
-        // short circuit if same object
-        if (other == this) {
-            return true;
-        }
-        // instanceof handles nulls
-        if (!(other instanceof EmailCommand)) {
-            return false;
-        }
-
-        // state check
-        EmailCommand e = (EmailCommand) other;
-        return index.equals(e.index) && subject.equals(e.subject) && message.equals(e.message);
-    }
-}
 ```
-###### /java/seedu/address/logic/commands/RedoCommand.java
+###### /java/seedu/address/model/AddressBook.java
 ``` java
-    public RedoCommand(int numRedo) {
-        this.numRedo = numRedo;
-    }
-    public RedoCommand() {
-        try {
-            numRedo = ParserUtil.parseNumber("1");
-        } catch (IllegalValueException ex) {
-            System.out.println("Shouldn't reach here");
-        }
-    }
-    @Override
-    public CommandResult execute() throws CommandException {
-        requireAllNonNull(model, undoRedoStack);
-
-        if (undoRedoStack.getRedoStackSize() == 0) {
-            throw new CommandException("No more commands to redo!");
-        }
-        if (numRedo > undoRedoStack.getRedoStackSize()) {
-            throw new CommandException("Maximum redo size: " + undoRedoStack.getRedoStackSize());
-        }
-
-        for (int i = 0; i < numRedo; i++) {
-            if (!undoRedoStack.canRedo()) {
-                throw new CommandException(MESSAGE_FAILURE);
-            }
-
-            undoRedoStack.popRedo().redo();
-        }
-
-        return new CommandResult(MESSAGE_SUCCESS);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return other == this // short circuit if same object
-                || (other instanceof RedoCommand // instanceof handles nulls
-                && this.numRedo == (((RedoCommand) other).numRedo)); // state check
+    /**
+     *     Sort Persons according to sortType
+     */
+    public void sortPersons(String sortType) {
+        persons.sort(sortType);
+        syncMasterTagListWith(persons);
     }
 ```
-###### /java/seedu/address/logic/commands/SortCommand.java
+###### /java/seedu/address/model/Model.java
 ``` java
-/**
- * Sorts a the list of persons in ascending alphabetical order
- */
-public class SortCommand extends UndoableCommand {
-    public static final String COMMAND_WORD = "sort";
-    public static final String MESSAGE_SORT_SUCCESS = "Sorted in ascending order: ";
-    public static final String MESSAGE_SORT_FAILURE = "Invalid command format!";
-
-    public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Sorts the person identified by the index number used in the last person listing.\n"
-            + "Parameters: name/num/address/email (the type of sort to be executed)\n"
-            + "Example: " + COMMAND_WORD + " name"
-            + "Example: " + COMMAND_WORD + " number"
-            + "Example: " + COMMAND_WORD + " address"
-            + "Example: " + COMMAND_WORD + " remark"
-            + "Example: " + COMMAND_WORD + " email"
-            + "Example: " + COMMAND_WORD + " birthday";
-
-
-    private String sortType;
-
-    public SortCommand(String sortType) {
-        this.sortType = sortType.toLowerCase();
-    }
-
-    @Override
-    public CommandResult executeUndoableCommand() throws CommandException {
-        model.sortPerson(sortType);
-        return new CommandResult(MESSAGE_SORT_SUCCESS + sortType);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return other == this // short circuit if same object
-                || (other instanceof SortCommand // instanceof handles nulls
-                && this.sortType.equals(((SortCommand) other).sortType)); // state check
-    }
-}
-```
-###### /java/seedu/address/logic/commands/FavouriteCommand.java
-``` java
-/**
- * Favourites a person identified using it's last displayed index from the address book.
- */
-public class FavouriteCommand extends UndoableCommand {
-
-    public static final String COMMAND_WORD = "favourite";
-
-    public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Favourites/Highlights the person identified by the index number used in the last person listing.\n"
-            + "Parameters: INDEX (must be a positive integer)\n"
-            + "Example: " + COMMAND_WORD + " 1";
-
-    public static final String MESSAGE_FAVOURITE_SUCCESS = "Favourite Person: %1$s";
-
-    private final Index targetIndex;
-    private final Favourite favourite;
-
-    public FavouriteCommand(Index targetIndex, Favourite favourite) {
-        requireNonNull(targetIndex);
-        this.targetIndex = targetIndex;
-        this.favourite = favourite;
-    }
-
-    @Override
-    public CommandResult executeUndoableCommand() throws CommandException {
-
-        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
-
-        if (targetIndex.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-        }
-
-        ReadOnlyPerson personToEdit = lastShownList.get(targetIndex.getZeroBased());
-        ReadOnlyPerson editedPerson = personToEdit;
-        if (editedPerson.getFavourite().toString().equals("true")) {
-            favourite.inverse();
-        }
-        editedPerson.setFavourite(favourite);
-
-        try {
-            model.updatePerson(personToEdit, editedPerson);
-        } catch (DuplicatePersonException dpe) {
-            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
-        } catch (PersonNotFoundException pnfe) {
-            throw new AssertionError("The target person cannot be missing");
-        }
-        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-        return new CommandResult(String.format(MESSAGE_FAVOURITE_SUCCESS, editedPerson));
-
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        // short circuit if same object
-        if (other == this) {
-            return true;
-        }
-        // instanceof handles nulls
-        if (!(other instanceof FavouriteCommand)) {
-            return false;
-        }
-
-        // state check
-        FavouriteCommand e = (FavouriteCommand) other;
-        return targetIndex.equals(e.targetIndex) && favourite.equals(e.favourite);
-    }
-}
-```
-###### /java/seedu/address/logic/commands/RemarkCommand.java
-``` java
-/**
- * Edits the remark of the person identified by index number in person listing.
- */
-
-public class RemarkCommand extends UndoableCommand {
-
-    public static final String COMMAND_WORD = "remark";
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the remark of the person identified "
-            + "by the index number used in the last person listing. "
-            + "Existing remark will be overwritten by the input.\n"
-            + "Parameters: INDEX (must be a positive integer) "
-            + PREFIX_REMARK + "[REMARK]\n"
-            + "Example: " + COMMAND_WORD + " 1 "
-            + PREFIX_REMARK + "Likes to swim.";
-
-    public static final String MESSAGE_REMARK_SUCCESS = "Remark edited for Person: ";
-    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
-    public static final String MISSING_PERSON = "Person cannot be found";
-
-    private final Index index;
-    private final Remark remark;
-
-
-    public RemarkCommand (Index index, Remark remark) {
-        requireNonNull(index);
-        requireNonNull(remark);
-
-        this.index = index;
-        this.remark = remark;
-    }
-
-    public RemarkCommand (Index index, String remark) {
-        requireNonNull(index);
-        requireNonNull(remark);
-
-        this.index = index;
-        this.remark = new Remark(remark);
-    }
-    @Override
-    public CommandResult executeUndoableCommand() throws CommandException {
-        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
-
-        if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-        }
-
-        ReadOnlyPerson personToEdit = lastShownList.get(index.getZeroBased());
-        Person editedPerson = new Person(personToEdit.getName(), personToEdit.getPhone(), personToEdit.getEmail(),
-                personToEdit.getAddress(), remark, personToEdit.getBirthday(), personToEdit.getTags(),
-                personToEdit.getPicture(), personToEdit.getFavourite());
-
-        try {
-            model.updatePerson(personToEdit, editedPerson);
-        } catch (DuplicatePersonException dpe) {
-            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
-        } catch (PersonNotFoundException pnfe) {
-            throw new AssertionError(MISSING_PERSON);
-        }
-
-        model.updateListToShowAll();
-        return new CommandResult(MESSAGE_REMARK_SUCCESS + personToEdit.getName().toString());
-    }
-
-    @Override
-     public boolean equals(Object other) {
-        // short circuit if same object
-        if (other == this) {
-            return true;
-        }
-        // instanceof handles nulls
-        if (!(other instanceof RemarkCommand)) {
-            return false;
-        }
-
-        // state check
-        RemarkCommand e = (RemarkCommand) other;
-        return index.equals(e.index) && remark.equals(e.remark);
-    }
-}
-```
-###### /java/seedu/address/logic/commands/UndoCommand.java
-``` java
-    public UndoCommand(int numUndo) {
-        this.numUndo = numUndo;
-    }
-    public UndoCommand() {
-        try {
-            numUndo = ParserUtil.parseNumber(NUMBER_ONE);
-        } catch (IllegalValueException ex) {
-            System.out.println(MESSAGE_INVALID_COMMAND);
-        }
-
-    }
-
-    @Override
-    public CommandResult execute() throws CommandException {
-        requireAllNonNull(model, undoRedoStack);
-
-        if (undoRedoStack.getUndoStackSize() == 0) {
-            throw new CommandException(MESSAGE_EMPTYSTACK);
-        }
-        if (numUndo > undoRedoStack.getUndoStackSize()) {
-            throw new CommandException(MESSAGE_TOO_MANY_UNDO + undoRedoStack.getUndoStackSize());
-        }
-
-        for (int i = 0; i < numUndo; i++) {
-            if (!undoRedoStack.canUndo()) {
-                throw new CommandException(MESSAGE_FAILURE);
-            }
-
-            undoRedoStack.popUndo().undo();
-        }
-        return new CommandResult(MESSAGE_SUCCESS);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return other == this // short circuit if same object
-                || (other instanceof UndoCommand // instanceof handles nulls
-                && this.numUndo == (((UndoCommand) other).numUndo)); // state check
-    }
+    /**Sorts all the people in the current database*/
+    void sortPerson(String sortType);
 ```
 ###### /java/seedu/address/model/person/Favourite.java
 ``` java
@@ -1124,25 +952,119 @@ public class Favourite {
         }
     }
 ```
-###### /java/seedu/address/model/AddressBook.java
+###### /java/seedu/address/Sound.java
+``` java
+/**
+ * Plays the errorSound.
+ */
+public class Sound {
+    private static final Logger logger = LogsCenter.getLogger("Error Sound");
+    private static ArrayList<String> musicList = new ArrayList<String>(Arrays.asList("ErrorSound.mp3"));
+    private static int curr = 0;
+    private static String bip;
+    private static Media hit;
+    private static MediaPlayer mediaPlayer;
+
+
+    /**
+     * start playing the first error music on the playlist.
+     */
+
+    public static void music() {
+        try {
+            bip = musicList.get(curr);
+            hit = new Media(Thread.currentThread().getContextClassLoader().getResource(bip).toURI().toString());
+            mediaPlayer = new MediaPlayer(hit);
+            mediaPlayer.play();
+        } catch (Exception ex) {
+            logger.info("Error with playing sound.");
+            ex.printStackTrace();
+        }
+    }
+}
+```
+###### /java/seedu/address/ui/CommandBox.java
+``` java
+/**
+ * The UI component that is responsible for receiving user command inputs.
+ */
+public class CommandBox extends UiPart<Region> {
+
+    public static final String AUTOCOMPLETE_FILE_NAME = "Autocomplete.xml";
+    public static final String ERROR_STYLE_CLASS = "error";
+    private static final String FXML = "CommandBox.fxml";
+    private static String[] possibleSuggestion = {"add", "clear", "list",
+        "edit", "find", "delete", "select", "history", "undo", "redo", "exit", "sort", "sort name",
+        "sort num", "sort email", "sort address", "sort remark", "exit"};
+    private static ArrayList<String> mainPossibleSuggestion = new ArrayList<String>(Arrays.asList(possibleSuggestion));
+    private final Logger logger = LogsCenter.getLogger(CommandBox.class);
+    private final Logic logic;
+    private ListElementPointer historySnapshot;
+
+    @FXML
+    private TextField commandTextField;
+    private ArrayList<String> prevText = new ArrayList<String>();
+    private AutoCompletionBinding autocompletionbinding;
+    public CommandBox(Logic logic) {
+        super(FXML);
+        this.logic = logic;
+        // calls #setStyleToDefault() whenever there is a change to the text of the command box.
+        commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
+        historySnapshot = logic.getHistorySnapshot();
+        try {
+            XMLDecoder e = new XMLDecoder(new FileInputStream("Autocomplete.xml"));
+            mainPossibleSuggestion = ((ArrayList<String>) e.readObject());
+            e.close();
+        } catch (Exception ex) {
+            try {
+                File file = new File("Autocomplete.xml");
+                file.createNewFile();
+            } catch (IOException ioe) {
+                raise(new DataSavingExceptionEvent(ex));
+            }
+        }
+        autocompletionbinding = TextFields.bindAutoCompletion(commandTextField, mainPossibleSuggestion);
+    }
+```
+###### /java/seedu/address/ui/CommandBox.java
+``` java
+
+    /**
+     * Adds in a valid command string into autocomplete.xml storage
+     * @param commandWord
+     * @throws CommandException if autocomplete.xml cannot be made.
+     */
+    public static void setAddSuggestion(String commandWord) throws CommandException {
+        if (!mainPossibleSuggestion.contains(commandWord)) {
+            try {
+                mainPossibleSuggestion.add(commandWord.trim());
+                XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(AUTOCOMPLETE_FILE_NAME)));
+                e.writeObject(mainPossibleSuggestion);
+                e.close();
+            } catch (Exception ex) {
+                try {
+                    File file = new File("Autocomplete.xml");
+                    file.createNewFile();
+                } catch (IOException ioe) {
+                    throw new CommandException("Unable to create file Autocomplete.xml");
+                }
+            }
+        }
+    }
+```
+###### /java/seedu/address/ui/PersonCard.java
 ``` java
     /**
-     *     Sort Persons according to sortType
+     * Binds the individual UI elements to observe their respective {@code Person} properties
+     * so that they will be notified of any changes.
+     * Changes the color code of the person if favourite.
      */
-    public void sortPersons(String sortType) {
-        persons.sort(sortType);
-        syncMasterTagListWith(persons);
+    private void bindListeners(ReadOnlyPerson person) {
+        name.textProperty().bind(Bindings.convert(person.nameProperty()));
+        if (person.getFavourite().toString().equals("true")) {
+            name.setStyle("-fx-background-color : #ff0000");
+        } else if (person.getFavourite().toString().equals("false")) {
+            name.setStyle("-fx-background-color : transparent");
+        }
     }
-```
-###### /java/seedu/address/model/ModelManager.java
-``` java
-    @Override
-    public void updateListToShowAll() {
-        filteredPersons.setPredicate(null);
-    }
-```
-###### /java/seedu/address/model/Model.java
-``` java
-    /**Sorts all the people in the current database*/
-    void sortPerson(String sortType);
 ```
