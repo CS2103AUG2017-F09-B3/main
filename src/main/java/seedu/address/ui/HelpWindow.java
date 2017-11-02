@@ -27,6 +27,7 @@ public class HelpWindow extends UiPart<Region> {
 
     private final Stage dialogStage;
 
+    //@@author bokwoon95
     public HelpWindow() {
         super(FXML);
         Scene scene = new Scene(getRoot());
@@ -38,6 +39,7 @@ public class HelpWindow extends UiPart<Region> {
         String userGuideUrl = getClass().getResource(USERGUIDE_FILE_PATH).toString();
         browser.getEngine().load(userGuideUrl);
     }
+    //author
 
     /**
      * Shows the help window.
