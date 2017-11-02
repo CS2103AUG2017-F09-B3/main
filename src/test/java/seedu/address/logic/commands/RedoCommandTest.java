@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import seedu.address.commons.core.index.Index;
+import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.logic.CommandHistory;
 import seedu.address.logic.UndoRedoStack;
 import seedu.address.model.Model;
@@ -35,7 +36,7 @@ public class RedoCommandTest {
     }
 
     @Test
-    public void execute() {
+    public void execute() throws IllegalValueException {
         UndoRedoStack undoRedoStack = prepareStack(
                 Collections.emptyList(), Arrays.asList(deleteCommandTwo, deleteCommandOne));
         RedoCommand redoCommand = new RedoCommand();

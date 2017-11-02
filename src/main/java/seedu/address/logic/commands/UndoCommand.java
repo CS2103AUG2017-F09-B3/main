@@ -28,40 +28,67 @@ public class UndoCommand extends Command {
     public static final String MESSAGE_INVALID_COMMAND = "Shouldn't reach here";
     public static final String MESSAGE_EMPTYSTACK = "No more commands to undo!";
     public static final String MESSAGE_TOO_MANY_UNDO = "Maximum undo size: ";
+    public static final int INDEX_ZERO = 0;
 
     private int numUndo;
     //@@author justintkj
     public UndoCommand(int numUndo) {
         this.numUndo = numUndo;
     }
-    public UndoCommand() {
-        try {
-            numUndo = ParserUtil.parseNumber(NUMBER_ONE);
-        } catch (IllegalValueException ex) {
-            System.out.println(MESSAGE_INVALID_COMMAND);
-        }
 
+    public UndoCommand() throws IllegalValueException {
+        numUndo = ParserUtil.parseNumber(NUMBER_ONE);
     }
 
     @Override
     public CommandResult execute() throws CommandException {
         requireAllNonNull(model, undoRedoStack);
 
-        if (undoRedoStack.getUndoStackSize() == 0) {
-            throw new CommandException(MESSAGE_EMPTYSTACK);
-        }
-        if (numUndo > undoRedoStack.getUndoStackSize()) {
-            throw new CommandException(MESSAGE_TOO_MANY_UNDO + undoRedoStack.getUndoStackSize());
-        }
+        checkStackNotEmpty();
+        checkUndoSizeNotBiggerThanStack();
 
-        for (int i = 0; i < numUndo; i++) {
+        undoMultipleTimes();
+        return new CommandResult(MESSAGE_SUCCESS);
+    }
+    /**
+     * Undo for numUndo number of times
+     * @throws CommandException if undo while stack is empty
+     */
+    private void undoMultipleTimes() throws CommandException {
+        for (int i = INDEX_ZERO; i < numUndo; i++) {
             if (!undoRedoStack.canUndo()) {
                 throw new CommandException(MESSAGE_FAILURE);
             }
 
             undoRedoStack.popUndo().undo();
         }
-        return new CommandResult(MESSAGE_SUCCESS);
+    }
+
+    /**
+     * Checks if number of undos is not bigger than current avaliable number of undo
+     * @throws CommandException if redo while stack is empty
+     */
+    private void checkUndoSizeNotBiggerThanStack() throws CommandException {
+        if (numUndo > undoRedoStack.getUndoStackSize()) {
+            throw new CommandException(MESSAGE_TOO_MANY_UNDO + undoRedoStack.getUndoStackSize());
+        }
+    }
+
+    /**
+     * Checks if current number of redo avaliable is zero
+     * @throws CommandException if current stack size is zero
+     */
+    private void checkStackNotEmpty() throws CommandException {
+        if (undoRedoStack.getUndoStackSize() == 0) {
+            throw new CommandException(MESSAGE_EMPTYSTACK);
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof UndoCommand // instanceof handles nulls
+                && this.numUndo == (((UndoCommand) other).numUndo)); // state check
     }
 
     @Override

@@ -12,6 +12,12 @@ import seedu.address.logic.parser.exceptions.ParseException;
  * Parses input arguments and creates a new EmailCommand object
  */
 public class EmailCommandParser implements Parser<EmailCommand> {
+
+    public static final String EMPTY_STRING = "";
+    public static final int FIRST_PART_MESSAGE = 0;
+    public static final int SECOND_PART_MESSAGE = 1;
+    public static final int THIRD_PART_MESSAGE = 2;
+
     /**
      * Parses the given {@code String} of arguments in the context of the EmailCommand
      * and returns a Email object for execution.
@@ -20,22 +26,30 @@ public class EmailCommandParser implements Parser<EmailCommand> {
      */
     public EmailCommand parse(String args) throws ParseException {
         requireNonNull(args);
-
+        assert args != EMPTY_STRING;
         Index index;
         String subject;
         String message;
         try {
             String[] messages = args.trim().split(",");
-            if (messages.length != 3) {
-                throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EmailCommand.MESSAGE_USAGE));
-            }
-            String[] splitArgs = messages[0].trim().split(" ");
-            index = ParserUtil.parseIndex(splitArgs[0]);
-            subject = (messages[1]);
-            message = (messages[2]);
+            checkValidNumberOfArguments(messages);
+            String[] splitArgs = messages[FIRST_PART_MESSAGE].trim().split(" ");
+            index = ParserUtil.parseIndex(splitArgs[FIRST_PART_MESSAGE]);
+            subject = (messages[SECOND_PART_MESSAGE]);
+            message = (messages[THIRD_PART_MESSAGE]);
         } catch (IllegalValueException ive) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EmailCommand.MESSAGE_USAGE));
         }
         return new EmailCommand(index, subject, message);
+    }
+
+    private EmailCommand makeParseException() throws ParseException {
+        throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EmailCommand.MESSAGE_USAGE));
+    }
+
+    private void checkValidNumberOfArguments(String[] messages) throws ParseException {
+        if (messages.length != 3) {
+            makeParseException();
+        }
     }
 }

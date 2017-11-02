@@ -13,6 +13,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 public class RedoCommandParser implements Parser<RedoCommand> {
 
     public static final String NUMBER_ONE = "1";
+    public static final int FIRST_PART_MESSAGE = 0;
 
     /**
      * Parses the given {@code String} of arguments in the context of the UndoCommand
@@ -24,16 +25,27 @@ public class RedoCommandParser implements Parser<RedoCommand> {
 
         int numRedo;
         try {
-            if (splitArgs[0].trim().equals("")) {
-                numRedo = ParserUtil.parseNumber(NUMBER_ONE);
-            } else {
-                numRedo = ParserUtil.parseNumber(splitArgs[0]);
-            }
+            numRedo = getNumberRedoToBeDone(splitArgs[FIRST_PART_MESSAGE]);
         } catch (IllegalValueException ive) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RedoCommand.MESSAGE_USAGE), ive);
         }
 
         return new RedoCommand(numRedo);
+    }
+    /**
+     * Generates number of redo to be done
+     * @param splitArg Message given by user
+     * @return Number of redo to be done
+     * @throws IllegalValueException invalid number of redo to be done
+     */
+    private int getNumberRedoToBeDone(String splitArg) throws IllegalValueException {
+        int numRedo;
+        if (splitArg.trim().equals("")) {
+            numRedo = ParserUtil.parseNumber(NUMBER_ONE);
+        } else {
+            numRedo = ParserUtil.parseNumber(splitArg);
+        }
+        return numRedo;
     }
 
 }

@@ -21,16 +21,13 @@ import seedu.address.model.person.Favourite;
  */
 public class FavouriteCommandParserTest {
 
+    public static final String FIRST_PERSON = "1";
     private FavouriteCommandParser parser = new FavouriteCommandParser();
 
     @Test
-    public void parse_validArgs_returnsFavouriteCommand() {
-        try {
-            assertParseSuccess(parser, "1", new FavouriteCommand(INDEX_FIRST_PERSON,
-                    new Favourite("1")));
-        } catch (IllegalValueException ive) {
-            System.out.println("Wouldn't reach here");
-        }
+    public void parse_validArgs_returnsFavouriteCommand() throws IllegalValueException {
+            assertParseSuccess(parser, FIRST_PERSON, new FavouriteCommand(INDEX_FIRST_PERSON,
+                    new Favourite("true")));
     }
 
     @Test

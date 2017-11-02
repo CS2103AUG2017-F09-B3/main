@@ -6,7 +6,6 @@ import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.List;
 
-import seedu.address.commons.core.Messages;
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.person.Favourite;
@@ -43,15 +42,11 @@ public class FavouriteCommand extends UndoableCommand {
 
         List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
 
-        if (targetIndex.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-        }
+        CommandUtil.checksIndexSmallerThanList(lastShownList, targetIndex);
 
         ReadOnlyPerson personToEdit = lastShownList.get(targetIndex.getZeroBased());
         ReadOnlyPerson editedPerson = personToEdit;
-        if (editedPerson.getFavourite().toString().equals("true")) {
-            favourite.inverse();
-        }
+        toggleColor(editedPerson);
         editedPerson.setFavourite(favourite);
 
         try {
@@ -64,6 +59,16 @@ public class FavouriteCommand extends UndoableCommand {
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
         return new CommandResult(String.format(MESSAGE_FAVOURITE_SUCCESS, editedPerson));
 
+    }
+
+    /**
+     * Toggles the current color state of the person selected
+     * @param editedPerson selected person to edit
+     */
+    private void toggleColor(ReadOnlyPerson editedPerson) {
+        if (editedPerson.getFavourite().toString().equals("true")) {
+            favourite.inverse();
+        }
     }
 
     @Override
