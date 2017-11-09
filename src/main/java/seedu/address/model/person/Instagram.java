@@ -5,9 +5,10 @@ import static java.util.Objects.requireNonNull;
 import seedu.address.commons.exceptions.IllegalValueException;
 
 /**
- * Represents a Person's address in the address book.
+ * Represents a Person's instagram in the address book.
  * Guarantees: immutable; is valid as declared in {@link #isValidInstagram(String)}
  */
+//@@author bokwoon95
 public class Instagram implements Comparable {
 
     public static final String MESSAGE_INSTAGRAM_CONSTRAINTS =
