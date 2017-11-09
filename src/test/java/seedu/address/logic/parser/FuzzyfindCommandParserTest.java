@@ -19,7 +19,8 @@ public class FuzzyfindCommandParserTest {
     @Test
     //empty input should throw error
     public void parse_emptyArg_throwsParseException() {
-        assertParseFailure(parser, "     ", String.format(MESSAGE_INVALID_COMMAND_FORMAT, FuzzyfindCommand.MESSAGE_USAGE));
+        assertParseFailure(parser, "     ",
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, FuzzyfindCommand.MESSAGE_USAGE));
     }
 
     @Test
