@@ -28,6 +28,8 @@
          <Label fx:id="birthday" styleClass="cell_small_label1" text="\$birthday" GridPane.columnIndex="1" GridPane.rowIndex="4" />
          <Label styleClass="cell_small_label" text="Remarks:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
          <Label fx:id="remark" styleClass="cell_small_label1" text="\$remark" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+          <Label styleClass="cell_small_label" text="Insta:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+          <Label fx:id="instagram" styleClass="cell_small_label1" text="\$instagram" GridPane.columnIndex="1" GridPane.rowIndex="6" />
          <FlowPane fx:id="tags" prefHeight="23.0" prefWidth="172.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
       </GridPane>
         <columnConstraints>
